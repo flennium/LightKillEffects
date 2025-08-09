@@ -1,0 +1,20 @@
+# Player Data Storage
+# This file stores individual player preferences and unlocked effects
+# Format: UUID -> player data
+
+# Example entry (will be auto-generated):
+# 12345678-1234-1234-1234-123456789abc:
+#   name: "PlayerName"
+#   selected-effect: "prismatic_shatter"
+#   unlocked-effects:
+#     - "prismatic_shatter"
+#     - "bioluminescent_bloom"
+#   favorites:
+#     - "prismatic_shatter"
+#   last-used: 1234567890
+#   total-kills: 25
+#   effect-stats:
+#     prismatic_shatter: 15
+#     bioluminescent_bloom: 10
+
+# This file will be automatically populated when players join and use effects

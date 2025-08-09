@@ -1,0 +1,159 @@
+name: LightKillEffects
+version: 1.0.0
+main: org.flennn.LightKillEffects
+api-version: 1.20
+description: Stunning light-based kill effects plugin with 20 unique visual effects
+author: flennn
+website: https://github.com/flennium
+
+commands:
+  killeffects:
+    description: Main command for kill effects
+    usage: /<command> [gui|set|reload|preview]
+    aliases: [ke, effects]
+    permission: killeffects.use
+
+permissions:
+  killeffects.*:
+    description: Grants access to all kill effects and admin functions
+    default: op
+    children:
+      killeffects.admin: true
+      killeffects.use.*: true
+  
+  killeffects.admin:
+    description: Administrative functions for kill effects
+    default: op
+    children:
+      killeffects.reload: true
+      killeffects.set.others: true
+      killeffects.preview.all: true
+  
+  killeffects.use:
+    description: Basic permission to use kill effects
+    default: true
+    children:
+      killeffects.gui: true
+  
+  killeffects.use.*:
+    description: Access to all kill effects
+    default: op
+    children:
+      killeffects.use.lightning_storm: true
+      killeffects.use.solar_explosion: true
+      killeffects.use.frozen_burst: true
+      killeffects.use.neon_rave: true
+      killeffects.use.starfall_cascade: true
+      killeffects.use.prismatic_shatter: true
+      killeffects.use.void_consumption: true
+      killeffects.use.phoenix_rebirth: true
+      killeffects.use.celestial_gateway: true
+      killeffects.use.electric_overload: true
+      killeffects.use.crystal_garden: true
+      killeffects.use.spectral_haunt: true
+      killeffects.use.laser_light_show: true
+      killeffects.use.meteor_impact: true
+      killeffects.use.bioluminescent_bloom: true
+      killeffects.use.time_fracture: true
+      killeffects.use.divine_ascension: true
+      killeffects.use.toxic_meltdown: true
+      killeffects.use.quantum_collapse: true
+      killeffects.use.supernova: true
+  
+  # Individual effect permissions
+  killeffects.use.lightning_storm:
+    description: Lightning Storm effect - Multiple lightning bolts in circular patterns
+    default: false
+  
+  killeffects.use.solar_explosion:
+    description: Solar Explosion effect - Golden sphere with radiating light rays
+    default: false
+  
+  killeffects.use.frozen_burst:
+    description: Frozen Burst effect - Ice-blue spiraling particles with shattering ice
+    default: false
+  
+  killeffects.use.neon_rave:
+    description: Neon Rave effect - Rapidly cycling colored lights in disco fashion
+    default: false
+  
+  killeffects.use.starfall_cascade:
+    description: Starfall Cascade effect - Glowing particles falling like shooting stars
+    default: true
+  
+  killeffects.use.prismatic_shatter:
+    description: Prismatic Shatter effect - Rainbow glass particles with beacon
+    default: true
+  
+  killeffects.use.void_consumption:
+    description: Void Consumption effect - Dark purple spiral black hole effect
+    default: false
+  
+  killeffects.use.phoenix_rebirth:
+    description: Phoenix Rebirth effect - Flame particles in wing patterns
+    default: false
+  
+  killeffects.use.celestial_gateway:
+    description: Celestial Gateway effect - Rotating light portal
+    default: false
+  
+  killeffects.use.electric_overload:
+    description: Electric Overload effect - Blue electrical jumping particles
+    default: false
+  
+  killeffects.use.crystal_garden:
+    description: Crystal Garden effect - Sprouting glowing crystal blocks
+    default: false
+  
+  killeffects.use.spectral_haunt:
+    description: Spectral Haunt effect - Ghostly victim silhouette
+    default: false
+  
+  killeffects.use.laser_light_show:
+    description: Laser Light Show effect - Intersecting colored laser beams
+    default: false
+  
+  killeffects.use.meteor_impact:
+    description: Meteor Impact effect - Fiery crater creation
+    default: false
+  
+  killeffects.use.bioluminescent_bloom:
+    description: Bioluminescent Bloom effect - Gentle spreading spore-like glow
+    default: true
+  
+  killeffects.use.time_fracture:
+    description: Time Fracture effect - Reality-cracking effect
+    default: false
+  
+  killeffects.use.divine_ascension:
+    description: Divine Ascension effect - Golden double helix spiral
+    default: false
+  
+  killeffects.use.toxic_meltdown:
+    description: Toxic Meltdown effect - Bubbling green corrosive spread
+    default: false
+  
+  killeffects.use.quantum_collapse:
+    description: Quantum Collapse effect - Phasing victim effect
+    default: false
+  
+  killeffects.use.supernova:
+    description: Supernova effect - Intense white light explosion
+    default: false
+  
+  # Utility permissions
+  killeffects.gui:
+    description: Access to kill effects GUI
+    default: true
+  
+  killeffects.reload:
+    description: Reload plugin configuration
+    default: op
+  
+  killeffects.set.others:
+    description: Set kill effects for other players
+    default: op
+  
+  killeffects.preview.all:
+    description: Preview any kill effect
+    default: op
