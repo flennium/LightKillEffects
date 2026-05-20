@@ -63,7 +63,37 @@ public enum EffectType {
             Particle.REVERSE_PORTAL, Sound.ENTITY_ENDERMAN_DEATH, 90, 5, 4),
     
     SUPERNOVA("supernova", "Supernova", Material.GLOWSTONE, 
-            Particle.FLASH, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 60, 10, 8);
+            Particle.FLASH, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 60, 10, 8),
+
+    STORM_CAGE("storm_cage", "Storm Cage", Material.LIGHTNING_ROD,
+            Particle.ELECTRIC_SPARK, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 90, 8, 5),
+
+    PHANTOM_WALTZ("phantom_waltz", "Phantom Waltz", Material.SOUL_LANTERN,
+            Particle.SOUL, Sound.ENTITY_GHAST_AMBIENT, 110, 5, 4),
+
+    MIRROR_BREAK("mirror_break", "Mirror Break", Material.TINTED_GLASS,
+            Particle.END_ROD, Sound.BLOCK_GLASS_BREAK, 80, 6, 4),
+
+    ROYAL_EXECUTION("royal_execution", "Royal Execution", Material.GOLDEN_HELMET,
+            Particle.TOTEM, Sound.ENTITY_PLAYER_LEVELUP, 100, 6, 4),
+
+    SAKURA_COLLAPSE("sakura_collapse", "Sakura Collapse", Material.PINK_PETALS,
+            Particle.VILLAGER_HAPPY, Sound.BLOCK_GRASS_BREAK, 100, 6, 5),
+
+    ALCHEMY_FAILURE("alchemy_failure", "Alchemy Failure", Material.BREWING_STAND,
+            Particle.SPELL_WITCH, Sound.BLOCK_BREWING_STAND_BREW, 110, 7, 5),
+
+    RUNIC_FORGE("runic_forge", "Runic Forge", Material.ANVIL,
+            Particle.FLAME, Sound.BLOCK_ANVIL_PLACE, 95, 7, 4),
+
+    CELESTIAL_BLOOM("celestial_bloom", "Celestial Bloom", Material.AMETHYST_SHARD,
+            Particle.END_ROD, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 120, 6, 5),
+
+    ASTRAL_VERDICT("astral_verdict", "Astral Verdict", Material.END_CRYSTAL,
+            Particle.ENCHANTMENT_TABLE, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 120, 8, 6),
+
+    TIME_SNAP("time_snap", "Time Snap", Material.CLOCK,
+            Particle.ENCHANTMENT_TABLE, Sound.ENTITY_ENDERMAN_TELEPORT, 90, 6, 4);
     
     private final String configKey;
     private final String displayName;

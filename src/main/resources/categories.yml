@@ -19,6 +19,7 @@ categories:
     effects:
       - "lightning_storm"
       - "electric_overload"
+      - "storm_cage"
   
   mystical:
     name: "&5&lMystical Effects"
@@ -30,6 +31,9 @@ categories:
       - "time_fracture"
       - "divine_ascension"
       - "quantum_collapse"
+      - "phantom_waltz"
+      - "astral_verdict"
+      - "time_snap"
   
   nature:
     name: "&a&lNature Effects"
@@ -38,6 +42,8 @@ categories:
       - "crystal_garden"
       - "bioluminescent_bloom"
       - "toxic_meltdown"
+      - "sakura_collapse"
+      - "celestial_bloom"
   
   cosmic:
     name: "&f&lCosmic Effects"
@@ -45,6 +51,13 @@ categories:
     effects:
       - "starfall_cascade"
       - "supernova"
+
+  arcane:
+    name: "&9&lArcane Effects"
+    icon: "BREWING_STAND"
+    effects:
+      - "alchemy_failure"
+      - "runic_forge"
   
   party:
     name: "&d&lParty Effects"
@@ -53,5 +66,7 @@ categories:
       - "neon_rave"
       - "prismatic_shatter"
       - "laser_light_show"
+      - "mirror_break"
+      - "royal_execution"
 
 # Individual Effect Configurations

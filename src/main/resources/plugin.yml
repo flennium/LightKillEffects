@@ -61,6 +61,16 @@ permissions:
       killeffects.use.toxic_meltdown: true
       killeffects.use.quantum_collapse: true
       killeffects.use.supernova: true
+      killeffects.use.storm_cage: true
+      killeffects.use.phantom_waltz: true
+      killeffects.use.mirror_break: true
+      killeffects.use.royal_execution: true
+      killeffects.use.sakura_collapse: true
+      killeffects.use.alchemy_failure: true
+      killeffects.use.runic_forge: true
+      killeffects.use.celestial_bloom: true
+      killeffects.use.astral_verdict: true
+      killeffects.use.time_snap: true
   
   # Individual effect permissions
   killeffects.use.lightning_storm:
@@ -141,6 +151,46 @@ permissions:
   
   killeffects.use.supernova:
     description: Supernova effect - Intense white light explosion
+    default: false
+
+  killeffects.use.storm_cage:
+    description: Storm Cage effect - Charged prison that detonates with voltage
+    default: false
+
+  killeffects.use.phantom_waltz:
+    description: Phantom Waltz effect - Ghostly dancers spiral around the victim
+    default: false
+
+  killeffects.use.mirror_break:
+    description: Mirror Break effect - Reflective panels shatter into fragments
+    default: false
+
+  killeffects.use.royal_execution:
+    description: Royal Execution effect - Regal crown and sigil finisher
+    default: false
+
+  killeffects.use.sakura_collapse:
+    description: Sakura Collapse effect - Blossoming petals collapse into a vortex
+    default: false
+
+  killeffects.use.alchemy_failure:
+    description: Alchemy Failure effect - Unstable magical brew erupts in color
+    default: false
+
+  killeffects.use.runic_forge:
+    description: Runic Forge effect - Molten forge runes ignite the ground
+    default: false
+
+  killeffects.use.celestial_bloom:
+    description: Celestial Bloom effect - A radiant flower opens in the air
+    default: false
+
+  killeffects.use.astral_verdict:
+    description: Astral Verdict effect - Constellations align for a judgment beam
+    default: false
+
+  killeffects.use.time_snap:
+    description: Time Snap effect - Afterimages freeze before reality snaps back
     default: false
   
   # Utility permissions
