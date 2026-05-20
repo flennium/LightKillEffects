@@ -6,8 +6,8 @@ Built for servers that want polished kill feedback without heavy dependencies or
 
 ## Showcase
 
-- [Showcase Video 1](./showcase1.mp4)
-- [Showcase Video 2](./showcase2.mp4)
+- [LightKillEffects - Showcase 01](https://youtu.be/Hnsg_wAR0k4)
+- [LightKillEffects - Showcase 02](https://youtu.be/hQ97ZWD1ANQ)
 
 ## Features
 
