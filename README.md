@@ -79,13 +79,3 @@ The jar is created in:
 ```text
 target/lightkilleffects-<version>.jar
 ```
-
-## Versioning
-
-LightKillEffects uses semantic versioning.
-
-- Patch: bug fixes, for example `1.1.1`
-- Minor: compatible features/config additions, for example `1.2.0`
-- Major: breaking changes, for example `2.0.0`
-
-Tags use `v<version>`, such as `v1.1.0`.
