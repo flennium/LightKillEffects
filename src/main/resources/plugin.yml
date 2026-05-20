@@ -1,10 +1,10 @@
 name: LightKillEffects
-version: 1.0.0
-main: org.flennn.LightKillEffects
+version: ${project.version}
+main: org.flennn.lightkilleffects.LightKillEffects
 api-version: 1.20
-description: Stunning light-based kill effects plugin with 20 unique visual effects
+description: Lightweight configurable kill effects for Paper servers
 author: flennn
-website: https://github.com/flennium
+website: https://github.com/flennium/LightKillEffects
 
 commands:
   killeffects:

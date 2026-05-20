@@ -1,10 +1,13 @@
-package org.flennn;
+package org.flennn.lightkilleffects.command;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.flennn.lightkilleffects.LightKillEffects;
+import org.flennn.lightkilleffects.effect.EffectType;
+import org.flennn.lightkilleffects.storage.PlayerData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,6 +114,10 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         
         // Check if setting for another player
         if (args.length >= 3 && sender.hasPermission("killeffects.set.others")) {
+            if (!(sender instanceof Player) && !plugin.getSettings().allowConsoleSetOthers()) {
+                sender.sendMessage(plugin.getMessage("players-only"));
+                return true;
+            }
             target = plugin.getServer().getPlayer(args[1]);
             effectName = args[2];
             
@@ -230,6 +237,13 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         if (!player.hasPermission("killeffects.preview.all") && 
             !plugin.getPlayerData().hasEffectPermission(player, effect)) {
             player.sendMessage(plugin.getMessage("no-permission"));
+            return true;
+        }
+
+        if (plugin.getSettings().requirePreviewUnlock()
+                && !player.hasPermission("killeffects.preview.all")
+                && !plugin.getPlayerData().getPlayerData(player).hasUnlockedEffect(effect)) {
+            player.sendMessage(plugin.getMessage("effect-locked", "effect", effect.getDisplayName()));
             return true;
         }
         

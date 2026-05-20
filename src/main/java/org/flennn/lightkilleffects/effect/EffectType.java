@@ -1,4 +1,4 @@
-package org.flennn;
+package org.flennn.lightkilleffects.effect;
 
 import org.bukkit.Material;
 import org.bukkit.Particle;

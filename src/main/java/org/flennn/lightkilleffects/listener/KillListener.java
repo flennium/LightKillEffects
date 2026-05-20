@@ -1,4 +1,4 @@
-package org.flennn;
+package org.flennn.lightkilleffects.listener;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -8,6 +8,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.flennn.lightkilleffects.LightKillEffects;
+import org.flennn.lightkilleffects.effect.EffectType;
+import org.flennn.lightkilleffects.storage.PlayerData;
 
 /**
  * Listens for entity death events and triggers kill effects
@@ -37,7 +40,8 @@ public class KillListener implements Listener {
         if (killer == null) return;
         
         // Check if players-only mode is enabled and victim is not a player
-        if (plugin.getConfig().getBoolean("general.players-only", false) && !(victim instanceof org.bukkit.entity.Player)) {
+        if ((!plugin.getSettings().allowMobKillEffects() || plugin.getConfig().getBoolean("general.players-only", false))
+                && !(victim instanceof org.bukkit.entity.Player)) {
             return;
         }
         

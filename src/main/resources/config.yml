@@ -31,6 +31,28 @@ general:
   # Only trigger effects when killing players (not mobs/animals)
   players-only: false
 
+# Security / Safety Settings
+security:
+  # If false, kill effects only trigger for player kills even when players-only is false.
+  allow-mob-kill-effects: true
+
+  # Allow console to set effects for online players with /killeffects set <player> <effect>.
+  allow-console-set-others: true
+
+  # If true, players can only preview effects they have unlocked unless they have killeffects.preview.all.
+  require-preview-unlock: true
+
+# Storage Settings
+storage:
+  # Maximum number of playerdata backups to keep.
+  max-backups: 10
+
+  # Create a backup before importing player data.
+  backup-before-import: true
+
+  # Prevent imports/exports outside the plugin data folder.
+  restrict-imports-to-data-folder: true
+
 # Performance Settings
 performance:
   # Maximum particle count per effect
@@ -396,7 +418,7 @@ effects:
 
 # Messages Configuration
 messages:
-  prefix: "&8⟜ &6⚡ &8⟝ "
+  prefix: "&8[&eLKE&8] "
   
   # Success messages
   effect-set: "&aYour kill effect has been set to &e{effect}&a!"

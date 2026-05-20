@@ -1,10 +1,14 @@
-package org.flennn;
+package org.flennn.lightkilleffects.storage;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.flennn.lightkilleffects.LightKillEffects;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Handles data storage and persistence for player data and plugin configuration
@@ -25,8 +29,8 @@ public class StorageHandler {
      */
     private void setupDataFiles() {
         // Ensure data folder exists
-        if (!plugin.getDataFolder().exists()) {
-            plugin.getDataFolder().mkdirs();
+        if (!plugin.getDataFolder().exists() && !plugin.getDataFolder().mkdirs()) {
+            plugin.getLogger().severe("Could not create plugin data folder.");
         }
         
         // Setup player data file
@@ -87,13 +91,7 @@ public class StorageHandler {
             String timestamp = String.valueOf(System.currentTimeMillis());
             File backupFile = new File(backupDir, "playerdata_" + timestamp + ".yml");
             
-            // Copy current player data to backup
-            FileConfiguration backup = new YamlConfiguration();
-            for (String key : playerDataConfig.getKeys(true)) {
-                backup.set(key, playerDataConfig.get(key));
-            }
-            
-            backup.save(backupFile);
+            Files.copy(playerDataFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             plugin.logInfo("&aBackup created: " + backupFile.getName());
             
             // Clean old backups (keep only last 10)
@@ -112,7 +110,8 @@ public class StorageHandler {
      */
     private void cleanOldBackups(File backupDir) {
         File[] backupFiles = backupDir.listFiles((dir, name) -> name.startsWith("playerdata_") && name.endsWith(".yml"));
-        if (backupFiles == null || backupFiles.length <= 10) {
+        int maxBackups = plugin.getSettings().maxBackups();
+        if (backupFiles == null || backupFiles.length <= maxBackups) {
             return;
         }
         
@@ -120,7 +119,7 @@ public class StorageHandler {
         java.util.Arrays.sort(backupFiles, (a, b) -> Long.compare(b.lastModified(), a.lastModified()));
         
         // Delete files beyond the 10 most recent
-        for (int i = 10; i < backupFiles.length; i++) {
+        for (int i = maxBackups; i < backupFiles.length; i++) {
             if (backupFiles[i].delete()) {
                 plugin.logDebug("Deleted old backup: " + backupFiles[i].getName());
             }
@@ -132,7 +131,7 @@ public class StorageHandler {
      */
     public boolean importPlayerData(File importFile) {
         try {
-            if (!importFile.exists()) {
+            if (!isSafeDataFile(importFile) || !importFile.exists() || !importFile.isFile()) {
                 plugin.logInfo("&cImport file does not exist: " + importFile.getName());
                 return false;
             }
@@ -140,7 +139,9 @@ public class StorageHandler {
             FileConfiguration importConfig = YamlConfiguration.loadConfiguration(importFile);
             
             // Create backup before importing
-            createBackup();
+            if (plugin.getSettings().backupBeforeImport()) {
+                createBackup();
+            }
             
             // Import data
             for (String key : importConfig.getKeys(true)) {
@@ -163,6 +164,17 @@ public class StorageHandler {
      */
     public boolean exportPlayerData(File exportFile) {
         try {
+            if (!isSafeDataFile(exportFile)) {
+                plugin.logInfo("&cExport path is not allowed: " + exportFile.getName());
+                return false;
+            }
+
+            File parent = exportFile.getParentFile();
+            if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                plugin.logInfo("&cCould not create export folder: " + parent.getName());
+                return false;
+            }
+
             FileConfiguration exportConfig = new YamlConfiguration();
             
             // Copy all player data
@@ -221,6 +233,20 @@ public class StorageHandler {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private boolean isSafeDataFile(File file) throws IOException {
+        if (file == null || !file.getName().endsWith(".yml")) {
+            return false;
+        }
+
+        if (!plugin.getSettings().restrictImportsToDataFolder()) {
+            return true;
+        }
+
+        Path dataFolder = plugin.getDataFolder().getCanonicalFile().toPath();
+        Path target = file.getCanonicalFile().toPath();
+        return target.startsWith(dataFolder);
     }
     
     // Getters

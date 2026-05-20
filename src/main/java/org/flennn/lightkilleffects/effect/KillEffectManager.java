@@ -1,4 +1,4 @@
-package org.flennn;
+package org.flennn.lightkilleffects.effect;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import org.flennn.lightkilleffects.LightKillEffects;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +22,7 @@ public class KillEffectManager {
     private final LightKillEffects plugin;
     private final Map<UUID, Long> cooldowns;
     private final Map<Location, Set<Block>> temporaryBlocks;
-    private final List<BukkitTask> activeTasks;
+    private final Set<BukkitTask> activeTasks;
     private final Random random;
     
     // Performance settings
@@ -37,12 +38,12 @@ public class KillEffectManager {
         this.plugin = plugin;
         this.cooldowns = new ConcurrentHashMap<>();
         this.temporaryBlocks = new ConcurrentHashMap<>();
-        this.activeTasks = new ArrayList<>();
+        this.activeTasks = ConcurrentHashMap.newKeySet();
         this.random = new Random();
         
         // Load performance settings
-        this.maxParticlesPerEffect = plugin.getConfig().getInt("performance.max-particles-per-effect", 500);
-        this.particleRenderDistance = plugin.getConfig().getInt("performance.particle-render-distance", 32);
+        this.maxParticlesPerEffect = plugin.getSettings().maxParticlesPerEffect();
+        this.particleRenderDistance = plugin.getSettings().particleRenderDistance();
         this.performanceMode = plugin.getConfig().getBoolean("performance.performance-mode", false);
         this.soundsEnabled = plugin.getConfig().getBoolean("general.sounds-enabled", true);
         
@@ -502,6 +503,10 @@ public class KillEffectManager {
     
     private void spawnParticles(List<Player> viewers, Location location, Particle particle, int count, 
                                double offsetX, double offsetY, double offsetZ, double extra, Object data) {
+        if (location == null || location.getWorld() == null || count <= 0) {
+            return;
+        }
+
         // Check if we've exceeded the total particle limit for this effect
         int currentCount = currentEffectParticleCount.get();
         if (currentCount >= maxParticlesPerEffect) {
@@ -524,7 +529,7 @@ public class KillEffectManager {
         currentEffectParticleCount.set(currentCount + count);
         
         for (Player player : viewers) {
-            if (player.getLocation().distance(location) <= particleRenderDistance) {
+            if (player.getWorld().equals(location.getWorld()) && player.getLocation().distanceSquared(location) <= particleRenderDistance * particleRenderDistance) {
                 player.spawnParticle(particle, location, count, offsetX, offsetY, offsetZ, extra, data);
             }
         }
@@ -538,6 +543,9 @@ public class KillEffectManager {
     
     private List<Player> getNearbyPlayers(Location location) {
         List<Player> players = new ArrayList<>();
+        if (location == null || location.getWorld() == null) {
+            return players;
+        }
         for (Entity entity : location.getWorld().getNearbyEntities(location, particleRenderDistance, 
                                                                    particleRenderDistance, particleRenderDistance)) {
             if (entity instanceof Player) {
@@ -548,6 +556,9 @@ public class KillEffectManager {
     }
     
     private void playSound(Location location, Sound sound) {
+        if (location == null || location.getWorld() == null || sound == null) {
+            return;
+        }
         location.getWorld().playSound(location, sound, 1.0f, 1.0f);
     }
     
@@ -573,7 +584,7 @@ public class KillEffectManager {
     }
     
     private void startCleanupTask() {
-        new BukkitRunnable() {
+        BukkitTask cleanupTask = new BukkitRunnable() {
             @Override
             public void run() {
                 // Clean expired cooldowns
@@ -589,7 +600,8 @@ public class KillEffectManager {
                     iterator.remove();
                 }
             }
-        }.runTaskTimer(plugin, 0, plugin.getConfig().getInt("performance.cleanup-interval", 200));
+        }.runTaskTimer(plugin, 0, plugin.getSettings().cleanupIntervalTicks());
+        activeTasks.add(cleanupTask);
     }
     
     public void cleanup() {

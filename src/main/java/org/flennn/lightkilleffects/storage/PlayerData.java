@@ -1,7 +1,9 @@
-package org.flennn;
+package org.flennn.lightkilleffects.storage;
 
 import org.bukkit.entity.Player;
 import org.bukkit.configuration.ConfigurationSection;
+import org.flennn.lightkilleffects.LightKillEffects;
+import org.flennn.lightkilleffects.effect.EffectType;
 
 import java.util.*;
 
@@ -96,7 +98,8 @@ public class PlayerData {
         } else {
             // New player - unlock effects based on permissions
             for (EffectType effect : EffectType.values()) {
-                if (!effect.requiresPermission() || hasEffectPermission(plugin.getServer().getPlayer(uuid), effect)) {
+                Player player = plugin.getServer().getPlayer(uuid);
+                if (!effect.requiresPermission() || (player != null && hasEffectPermission(player, effect))) {
                     data.addUnlockedEffect(effect);
                 }
             }
@@ -195,6 +198,9 @@ public class PlayerData {
         // Check if the effect requires permission
         if (!effect.requiresPermission()) {
             return true;
+        }
+        if (player == null) {
+            return false;
         }
         
         // Check permission node

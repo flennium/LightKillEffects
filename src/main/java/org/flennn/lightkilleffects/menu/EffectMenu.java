@@ -1,4 +1,4 @@
-package org.flennn;
+package org.flennn.lightkilleffects.menu;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,6 +14,9 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.flennn.lightkilleffects.LightKillEffects;
+import org.flennn.lightkilleffects.effect.EffectType;
+import org.flennn.lightkilleffects.storage.PlayerData;
 
 import java.util.*;
 
@@ -46,9 +49,6 @@ public class EffectMenu implements Listener {
         this.activeSessions = new HashMap<>();
         this.guiClickCooldowns = new HashMap<>();
         this.previewCooldowns = new HashMap<>();
-        
-        // Register this as an event listener
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
     
     /**
@@ -345,8 +345,8 @@ public class EffectMenu implements Listener {
         
         // Status indicators
         boolean unlocked = playerData.hasUnlockedEffect(effect);
-        boolean hasPermission = plugin.getPlayerData().hasEffectPermission(
-                plugin.getServer().getPlayer(playerData.getUuid()), effect);
+        Player onlinePlayer = plugin.getServer().getPlayer(playerData.getUuid());
+        boolean hasPermission = onlinePlayer != null && plugin.getPlayerData().hasEffectPermission(onlinePlayer, effect);
         boolean selected = effect == playerData.getSelectedEffect();
         boolean favorite = playerData.isFavorite(effect);
         
@@ -952,8 +952,9 @@ public class EffectMenu implements Listener {
                 return;
             }
             
-            if (player.hasPermission("killeffects.preview.all") || 
-                plugin.getPlayerData().hasEffectPermission(player, effect)) {
+            if (player.hasPermission("killeffects.preview.all")
+                    || (plugin.getPlayerData().hasEffectPermission(player, effect)
+                    && (!plugin.getSettings().requirePreviewUnlock() || playerData.hasUnlockedEffect(effect)))) {
                 
                 org.bukkit.Location previewLocation = player.getLocation().add(
                         player.getLocation().getDirection().multiply(
