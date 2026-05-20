@@ -43,6 +43,7 @@ messages:
   preview-disabled: "&cEffect previews are currently disabled!"
   preview-cooldown: "&cYou must wait {seconds} seconds before previewing another effect!"
   already-in-preview: "&cYou are already in a preview! Type /killeffects to exit."
+  preview-ended: "&aPreview ended."
   preview-location-not-set: "&cPreview location is not configured!"
   preview-mount-failed: "&cFailed to mount you for the preview. Please try again."
   preview-blocked-command: "&cThat command cannot be used during previews!"

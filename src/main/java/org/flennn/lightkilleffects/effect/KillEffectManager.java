@@ -70,7 +70,7 @@ public class KillEffectManager {
         if (effect == null || deathLocation == null) return;
         if (isOnCooldown(killer)) {
             long remaining = getRemainingCooldown(killer);
-            killer.sendMessage(plugin.getMessage("on-cooldown", "seconds", String.valueOf(remaining)));
+            plugin.sendMessage(killer, "on-cooldown", "seconds", String.valueOf(remaining));
             return;
         }
         setCooldown(killer);

@@ -24,7 +24,13 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!plugin.isReady()) {
-            sender.sendMessage(plugin.getMessage("plugin-not-ready"));
+            plugin.sendMessage(sender, "plugin-not-ready");
+            return true;
+        }
+        if (sender instanceof Player && plugin.getPreviewManager().isInPreview((Player) sender)
+                && (args.length == 0 || "exit".equalsIgnoreCase(args[0]) || "stop".equalsIgnoreCase(args[0]))) {
+            plugin.getPreviewManager().endPreview((Player) sender);
+            plugin.sendMessage(sender, "preview-ended");
             return true;
         }
         if (args.length == 0) {
@@ -70,23 +76,23 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
     }
     private boolean handleGuiCommand(CommandSender sender) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(plugin.getMessage("players-only"));
+            plugin.sendMessage(sender, "players-only");
             return true;
         }
         
         Player player = (Player) sender;
         if (!player.hasPermission("killeffects.gui")) {
-            player.sendMessage(plugin.getMessage("no-permission"));
+            plugin.sendMessage(player, "no-permission");
             return true;
         }
         plugin.getEffectMenu().openMainMenu(player);
-        player.sendMessage(plugin.getMessage("gui-opened"));
+        plugin.sendMessage(player, "gui-opened");
         
         return true;
     }
     private boolean handleSetCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(plugin.getMessage("usage-set"));
+            plugin.sendMessage(sender, "usage-set");
             return true;
         }
         
@@ -94,26 +100,26 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         String effectName;
         if (args.length >= 3 && sender.hasPermission("killeffects.set.others")) {
             if (!(sender instanceof Player) && !plugin.getSettings().allowConsoleSetOthers()) {
-                sender.sendMessage(plugin.getMessage("players-only"));
+                plugin.sendMessage(sender, "players-only");
                 return true;
             }
             target = plugin.getServer().getPlayer(args[1]);
             effectName = args[2];
             
             if (target == null) {
-                sender.sendMessage(plugin.getMessage("player-not-found", "player", args[1]));
+                plugin.sendMessage(sender, "player-not-found", "player", args[1]);
                 return true;
             }
         } else {
             if (!(sender instanceof Player)) {
-                sender.sendMessage(plugin.getMessage("players-only"));
+                plugin.sendMessage(sender, "players-only");
                 return true;
             }
             target = (Player) sender;
             effectName = args[1];
         }
         if (!target.hasPermission("killeffects.use")) {
-            sender.sendMessage(plugin.getMessage("target-no-permission", "player", target.getName()));
+            plugin.sendMessage(sender, "target-no-permission", "player", target.getName());
             return true;
         }
         if (effectName.equalsIgnoreCase("none") || effectName.equalsIgnoreCase("off")) {
@@ -121,9 +127,9 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             playerData.setSelectedEffect(null);
             plugin.getPlayerData().savePlayerData(target.getUniqueId());
             
-            target.sendMessage(plugin.getMessage("effect-disabled"));
+            plugin.sendMessage(target, "effect-disabled");
             if (target != sender) {
-                sender.sendMessage(plugin.getMessage("effect-disabled-other", "player", target.getName()));
+                plugin.sendMessage(sender, "effect-disabled-other", "player", target.getName());
             }
             return true;
         }
@@ -133,16 +139,16 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         }
         
         if (effect == null) {
-            sender.sendMessage(plugin.getMessage("effect-not-found", "effect", effectName));
+            plugin.sendMessage(sender, "effect-not-found", "effect", effectName);
             return true;
         }
         if (!plugin.getPlayerData().hasEffectPermission(target, effect)) {
-            sender.sendMessage(plugin.getMessage("effect-no-permission", "effect", effect.getDisplayName()));
+            plugin.sendMessage(sender, "effect-no-permission", "effect", effect.getDisplayName());
             return true;
         }
         PlayerData.PlayerEffectData playerData = plugin.getPlayerData().getPlayerData(target);
         if (!playerData.hasUnlockedEffect(effect)) {
-            sender.sendMessage(plugin.getMessage("effect-locked", "effect", effect.getDisplayName()));
+            plugin.sendMessage(sender, "effect-locked", "effect", effect.getDisplayName());
             return true;
         }
         playerData.setSelectedEffect(effect);
@@ -151,24 +157,23 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         String effectDisplayName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", 
                                                                 effect.getDisplayName());
         
-        target.sendMessage(plugin.getMessage("effect-set", "effect", effectDisplayName));
+        plugin.sendMessage(target, "effect-set", "effect", effectDisplayName);
         if (target != sender) {
-            sender.sendMessage(plugin.getMessage("effect-set-other", "player", target.getName())
-                    .replace("{effect}", effectDisplayName));
+            plugin.sendMessage(sender, "effect-set-other", "player", target.getName(), "effect", effectDisplayName);
         }
         
         return true;
     }
     private boolean handlePreviewCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(plugin.getMessage("players-only"));
+            plugin.sendMessage(sender, "players-only");
             return true;
         }
         
         Player player = (Player) sender;
         
         if (args.length < 2) {
-            player.sendMessage(plugin.getMessage("usage-preview"));
+            plugin.sendMessage(player, "usage-preview");
             return true;
         }
 
@@ -182,24 +187,25 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         }
         
         if (effect == null) {
-            player.sendMessage(plugin.getMessage("effect-not-found", "effect", args[1]));
+            plugin.sendMessage(player, "effect-not-found", "effect", args[1]);
             return true;
         }
 
-        if (!plugin.getPermissionManager().canAccessEffect(player, effect.getConfigKey())) {
+        if (!plugin.getPermissionManager().canPreviewAll(player)
+                && !plugin.getPermissionManager().canAccessEffect(player, effect.getConfigKey())) {
             return true;
         }
 
         if (plugin.getSettings().requirePreviewUnlock()
-                && !player.hasPermission("killeffects.preview.all")
+                && !plugin.getPermissionManager().canPreviewAll(player)
                 && !plugin.getPlayerData().getPlayerData(player).hasUnlockedEffect(effect)) {
-            player.sendMessage(plugin.getMessage("effect-locked", "effect", effect.getDisplayName()));
+            plugin.sendMessage(player, "effect-locked", "effect", effect.getDisplayName());
             return true;
         }
 
         if (plugin.getPreviewManager().isOnCooldown(player)) {
             long remaining = plugin.getPreviewManager().getRemainingCooldown(player);
-            player.sendMessage(plugin.getMessage("preview-cooldown", "seconds", String.valueOf(remaining)));
+            plugin.sendMessage(player, "preview-cooldown", "seconds", String.valueOf(remaining));
             return true;
         }
 
@@ -213,22 +219,22 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             
             String effectDisplayName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", 
                                                                     effect.getDisplayName());
-            player.sendMessage(plugin.getMessage("effect-previewed", "effect", effectDisplayName));
+            plugin.sendMessage(player, "effect-previewed", "effect", effectDisplayName);
         }
         
         return true;
     }
     private boolean handleReloadCommand(CommandSender sender) {
         if (!sender.hasPermission("killeffects.reload")) {
-            sender.sendMessage(plugin.getMessage("no-permission"));
+            plugin.sendMessage(sender, "no-permission");
             return true;
         }
         
         try {
             plugin.reloadPlugin();
-            sender.sendMessage(plugin.getMessage("config-reloaded"));
+            plugin.sendMessage(sender, "config-reloaded");
         } catch (Exception e) {
-            sender.sendMessage(plugin.getMessage("reload-error"));
+            plugin.sendMessage(sender, "reload-error");
             plugin.getLogger().severe("Error during reload: " + e.getMessage());
             e.printStackTrace();
         }
@@ -237,45 +243,44 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
     }
     private boolean handleInfoCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(plugin.getMessage("players-only"));
+            plugin.sendMessage(sender, "players-only");
             return true;
         }
         
         Player player = (Player) sender;
         PlayerData.PlayerEffectData playerData = plugin.getPlayerData().getPlayerData(player);
         
-        player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', "&6&lKill Effects Info:"));
+        plugin.sendRawMessage(player, "info-header", "&6&lKill Effects Info:");
         
         String currentEffect = playerData.getSelectedEffect() != null ? 
                 plugin.getEffectsConfig().getString("effects." + playerData.getSelectedEffect().getConfigKey() + ".name", 
                                             playerData.getSelectedEffect().getDisplayName()) : "None";
-        player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', "&7Current Effect: &e" + currentEffect));
+        plugin.sendRawMessage(player, "info-current-effect", "&7Current Effect: &e" + currentEffect);
         
-        player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', 
-                "&7Unlocked Effects: &e" + playerData.getUnlockedEffects().size() + "&7/&e" + EffectType.values().length));
+        plugin.sendRawMessage(player, "info-unlocked-effects", 
+                "&7Unlocked Effects: &e" + playerData.getUnlockedEffects().size() + "&7/&e" + EffectType.values().length);
         
-        player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', 
-                "&7Total Kills: &e" + playerData.getTotalKills()));
+        plugin.sendRawMessage(player, "info-total-kills", "&7Total Kills: &e" + playerData.getTotalKills());
         
-        player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', 
+        plugin.sendRawMessage(player, "info-favorites", 
                 "&7Favorites: &e" + playerData.getFavorites().size() + "&7/&e" + 
-                plugin.getConfig().getInt("general.max-favorites", 5)));
+                plugin.getConfig().getInt("general.max-favorites", 5));
         
         return true;
     }
     private boolean handleStatsCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(plugin.getMessage("players-only"));
+            plugin.sendMessage(sender, "players-only");
             return true;
         }
         
         Player player = (Player) sender;
         PlayerData.PlayerEffectData playerData = plugin.getPlayerData().getPlayerData(player);
         
-        player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', "&6&lYour Effect Statistics:"));
+        plugin.sendRawMessage(player, "stats-header", "&6&lYour Effect Statistics:");
         
         if (playerData.getEffectStats().isEmpty()) {
-            player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', "&7No effects used yet!"));
+            plugin.sendRawMessage(player, "stats-empty", "&7No effects used yet!");
             return true;
         }
         playerData.getEffectStats().entrySet().stream()
@@ -285,21 +290,21 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
                     String effectName = plugin.getEffectsConfig().getString("effects." + entry.getKey().getConfigKey() + ".name", 
                                                                     entry.getKey().getDisplayName());
                     String message = "&7" + effectName + ": &e" + entry.getValue() + " kills";
-                    player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', message));
+                    plugin.sendRawMessage(player, "stats-effect-" + entry.getKey().getConfigKey(), message);
                 });
         
         return true;
     }
     private boolean handleFavoriteCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(plugin.getMessage("players-only"));
+            plugin.sendMessage(sender, "players-only");
             return true;
         }
         
         Player player = (Player) sender;
         
         if (args.length < 3) {
-            player.sendMessage(plugin.getMessage("usage-favorite"));
+            plugin.sendMessage(player, "usage-favorite");
             return true;
         }
         
@@ -311,13 +316,13 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         }
         
         if (effect == null) {
-            player.sendMessage(plugin.getMessage("effect-not-found", "effect", effectName));
+            plugin.sendMessage(player, "effect-not-found", "effect", effectName);
             return true;
         }
         
         PlayerData.PlayerEffectData playerData = plugin.getPlayerData().getPlayerData(player);
         if (!playerData.hasUnlockedEffect(effect)) {
-            player.sendMessage(plugin.getMessage("effect-locked", "effect", effect.getDisplayName()));
+            plugin.sendMessage(player, "effect-locked", "effect", effect.getDisplayName());
             return true;
         }
         
@@ -327,28 +332,28 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         switch (action) {
             case "add":
                 if (playerData.isFavorite(effect)) {
-                    player.sendMessage(plugin.getMessage("already-favorite", "effect", effectDisplayName));
+                    plugin.sendMessage(player, "already-favorite", "effect", effectDisplayName);
                 } else if (!playerData.canAddFavorite()) {
-                    player.sendMessage(plugin.getMessage("favorites-full"));
+                    plugin.sendMessage(player, "favorites-full");
                 } else {
                     playerData.addFavorite(effect);
                     plugin.getPlayerData().savePlayerData(player.getUniqueId());
-                    player.sendMessage(plugin.getMessage("favorite-added", "effect", effectDisplayName));
+                    plugin.sendMessage(player, "favorite-added", "effect", effectDisplayName);
                 }
                 break;
                 
             case "remove":
                 if (!playerData.isFavorite(effect)) {
-                    player.sendMessage(plugin.getMessage("not-favorite", "effect", effectDisplayName));
+                    plugin.sendMessage(player, "not-favorite", "effect", effectDisplayName);
                 } else {
                     playerData.removeFavorite(effect);
                     plugin.getPlayerData().savePlayerData(player.getUniqueId());
-                    player.sendMessage(plugin.getMessage("favorite-removed", "effect", effectDisplayName));
+                    plugin.sendMessage(player, "favorite-removed", "effect", effectDisplayName);
                 }
                 break;
                 
             default:
-                player.sendMessage(plugin.getMessage("usage-favorite"));
+                plugin.sendMessage(player, "usage-favorite");
                 break;
         }
         
@@ -356,8 +361,10 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
     }
     private void sendHelpMessage(CommandSender sender) {
         List<String> helpLines = plugin.getMessagesConfig().getStringList("messages.help");
+        int index = 0;
         for (String line : helpLines) {
-            sender.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', line));
+            plugin.sendRawMessage(sender, "help-" + index, line);
+            index++;
         }
     }
     

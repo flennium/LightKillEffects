@@ -24,44 +24,56 @@ public class PreviewEnvironmentManager {
     }
 
     public boolean startPreview(Player player, String effectName) {
+        if (player == null || !player.isOnline()) {
+            return false;
+        }
+
         if (!isPreviewEnabled()) {
-            player.sendMessage(plugin.getMessage("preview-disabled"));
+            plugin.sendMessage(player, "preview-disabled");
             return false;
         }
 
         if (isInPreview(player)) {
-            player.sendMessage(plugin.getMessage("already-in-preview"));
+            plugin.sendMessage(player, "already-in-preview");
             return false;
         }
 
         Location previewLoc = getPreviewLocation();
         if (previewLoc == null) {
-            player.sendMessage(plugin.getMessage("preview-location-not-set"));
+            plugin.sendMessage(player, "preview-location-not-set");
             plugin.logWarn("Preview location not configured in config.yml");
             return false;
         }
 
         try {
             PreviewSession session = new PreviewSession(player, previewLoc);
+            activeSessions.put(player.getUniqueId(), session);
             
             savePlayerState(player);
-            player.teleport(previewLoc);
+            if (!player.teleport(previewLoc)) {
+                activeSessions.remove(player.getUniqueId());
+                restorePlayerState(player);
+                plugin.sendMessage(player, "preview-location-not-set");
+                return false;
+            }
             
             if (!mountInBoat(player)) {
-                player.sendMessage(plugin.getMessage("preview-mount-failed"));
+                activeSessions.remove(player.getUniqueId());
+                plugin.sendMessage(player, "preview-mount-failed");
                 restorePlayerState(player);
                 return false;
             }
             
-            activeSessions.put(player.getUniqueId(), session);
             setPreviewCooldown(player);
             hidePlayerFromOthers(player);
+            scheduleEnd(player.getUniqueId(), session);
             
             plugin.logDebug("Started preview session for " + player.getName() + ": " + effectName);
             return true;
         } catch (Exception e) {
             Console.error("Failed to start preview for " + player.getName() + ": " + e.getMessage());
             plugin.getLogger().severe(e.toString());
+            activeSessions.remove(player.getUniqueId());
             restorePlayerState(player);
             return false;
         }
@@ -76,9 +88,12 @@ public class PreviewEnvironmentManager {
             boat.setInvulnerable(true);
             boat.setCustomNameVisible(false);
             boat.setInvisible(true);
-            boat.setNoGravity(true);
+            boat.setGravity(false);
             boat.setPersistent(true);
-            boat.addPassenger(player);
+            if (!boat.addPassenger(player)) {
+                boat.remove();
+                return false;
+            }
 
             PreviewSession session = activeSessions.get(player.getUniqueId());
             if (session != null) {
@@ -94,12 +109,17 @@ public class PreviewEnvironmentManager {
     }
 
     public void endPreview(Player player) {
+        if (player == null) {
+            return;
+        }
+
         PreviewSession session = activeSessions.get(player.getUniqueId());
         if (session == null) {
             return;
         }
 
         try {
+            activeSessions.remove(player.getUniqueId());
             if (session.isBoatValid()) {
                 session.getBoatEntity().eject();
                 session.getBoatEntity().remove();
@@ -112,21 +132,27 @@ public class PreviewEnvironmentManager {
 
             restorePlayerState(player);
             showPlayerToOthers(player);
-            activeSessions.remove(player.getUniqueId());
+            session.end();
             
             plugin.logDebug("Ended preview session for " + player.getName());
         } catch (Exception e) {
+            activeSessions.remove(player.getUniqueId());
+            session.end();
             Console.error("Error ending preview for " + player.getName() + ": " + e.getMessage());
         }
     }
 
     public boolean isInPreview(Player player) {
+        if (player == null) {
+            return false;
+        }
         PreviewSession session = activeSessions.get(player.getUniqueId());
         return session != null && session.isActive();
     }
 
     public boolean isPreviewEnabled() {
-        return plugin.getConfig().getBoolean("preview.enabled", true);
+        return plugin.getConfig().getBoolean("gui.preview.enabled",
+                plugin.getConfig().getBoolean("preview.enabled", true));
     }
 
     public PreviewSession getSession(Player player) {
@@ -145,7 +171,7 @@ public class PreviewEnvironmentManager {
 
     private void hidePlayerFromOthers(Player player) {
         for (Player other : Bukkit.getOnlinePlayers()) {
-            if (!other.equals(player) && !other.hasPermission("killeffects.admin.see-previews")) {
+            if (!other.equals(player) && !plugin.getPermissionManager().canSeePreviewPlayers(other)) {
                 other.hidePlayer(plugin, player);
             }
         }
@@ -157,6 +183,24 @@ public class PreviewEnvironmentManager {
                 other.showPlayer(plugin, player);
             }
         }
+    }
+
+    private void scheduleEnd(UUID playerId, PreviewSession session) {
+        long duration = Math.max(20L, plugin.getConfig().getLong("gui.preview.duration",
+                plugin.getConfig().getLong("preview.duration", 120)));
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            PreviewSession current = activeSessions.get(playerId);
+            if (current != session || current == null || !current.isActive()) {
+                return;
+            }
+
+            Player player = Bukkit.getPlayer(playerId);
+            if (player != null && player.isOnline()) {
+                endPreview(player);
+            } else {
+                removeStaleSession(playerId);
+            }
+        }, duration);
     }
 
     public boolean isOnCooldown(Player player) {
@@ -184,26 +228,30 @@ public class PreviewEnvironmentManager {
     }
 
     private void setPreviewCooldown(Player player) {
-        long cooldownSeconds = plugin.getConfig().getLong("gui.preview.cooldown", 5);
+        long cooldownSeconds = plugin.getConfig().getLong("gui.preview.cooldown",
+                plugin.getConfig().getLong("preview.cooldown", 5));
         long cooldownMs = cooldownSeconds * 1000;
         previewCooldowns.put(player.getUniqueId(), System.currentTimeMillis() + cooldownMs);
     }
 
     private Location getPreviewLocation() {
-        String world = plugin.getConfig().getString("preview.world");
+        String world = plugin.getConfig().getString("gui.preview.world",
+                plugin.getConfig().getString("preview.world"));
         if (world == null || world.isEmpty()) {
-            return Bukkit.getWorld("world").getSpawnLocation();
+            org.bukkit.World defaultWorld = Bukkit.getWorld("world");
+            return defaultWorld == null ? null : defaultWorld.getSpawnLocation();
         }
 
         org.bukkit.World w = Bukkit.getWorld(world);
         if (w == null) {
             Console.warn("Preview world '" + world + "' not found. Using default world.");
-            return Bukkit.getWorld("world").getSpawnLocation();
+            org.bukkit.World defaultWorld = Bukkit.getWorld("world");
+            return defaultWorld == null ? null : defaultWorld.getSpawnLocation();
         }
 
-        double x = plugin.getConfig().getDouble("preview.x", 0);
-        double y = plugin.getConfig().getDouble("preview.y", 100);
-        double z = plugin.getConfig().getDouble("preview.z", 0);
+        double x = plugin.getConfig().getDouble("gui.preview.x", plugin.getConfig().getDouble("preview.x", 0));
+        double y = plugin.getConfig().getDouble("gui.preview.y", plugin.getConfig().getDouble("preview.y", 100));
+        double z = plugin.getConfig().getDouble("gui.preview.z", plugin.getConfig().getDouble("preview.z", 0));
 
         return new Location(w, x, y, z);
     }
@@ -229,6 +277,10 @@ public class PreviewEnvironmentManager {
     }
 
     public void validateBoatIntegrity(Player player) {
+        if (player == null) {
+            return;
+        }
+
         PreviewSession session = activeSessions.get(player.getUniqueId());
         if (session != null && !session.isBoatValid()) {
             plugin.logDebug("Boat was removed; ending preview for " + player.getName());

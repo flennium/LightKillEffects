@@ -56,6 +56,47 @@ storage:
   # Prevent imports/exports outside the plugin data folder.
   restrict-imports-to-data-folder: true
 
+# Feedback Cooldowns
+# Keeps repeated chat messages and menu button feedback from spamming players.
+feedback-cooldowns:
+  # Turn all feedback cooldowns on or off.
+  enabled: true
+
+  # Console normally receives every message so admins do not miss errors.
+  apply-to-console: false
+
+  # What happens when a player repeats feedback before the cooldown ends.
+  # ignore = keep the original cooldown, reset = extend it from the newest attempt.
+  suppressed-behavior: "ignore"
+
+  chat:
+    # per-key = each message has its own timer, global = all plugin chat shares one timer.
+    mode: "per-key"
+
+    # Default chat message cooldown in milliseconds.
+    default-ms: 1200
+
+    # Optional overrides for noisy messages. Message keys match messages.yml.
+    per-key:
+      on-cooldown: 2000
+      preview-cooldown: 2000
+      no-permission: 1500
+      effect-locked: 1500
+
+  ui:
+    # per-key = each UI action has its own timer, global = all UI feedback shares one timer.
+    mode: "per-key"
+
+    # Default menu click/sound feedback cooldown in milliseconds.
+    default-ms: 250
+
+    # Optional overrides for menu feedback actions.
+    per-key:
+      menu-open: 300
+      menu-click: 200
+      menu-click-sound: 200
+      effect-selected: 500
+
 # Performance Settings
 performance:
   # Maximum particle count per effect
@@ -90,15 +131,30 @@ gui:
   # Enable GUI sounds
   gui-sounds: true
   
-  # GUI click cooldown to prevent spam (in milliseconds)
-  click-cooldown-ms: 200
-  
-  # Preview mode settings
+  # Preview Environment Settings
   preview:
+    # Enable or disable the preview system
     enabled: true
-    duration: 40  # ticks
-    location-offset: 3  # blocks from player
-    cooldown: 5  # seconds between previews
+
+    # How long a preview lasts before the player is returned (ticks, 20 = 1 second).
+    duration: 120
+
+    # Seconds before the same player can start another preview.
+    cooldown: 5
+
+    # Blocks in front of the mounted player where the effect is shown.
+    location-offset: 3
+    
+    # World name where previews occur (set to 'world' or your preview world name)
+    world: "world"
+    
+    # Preview location coordinates (isolated area away from players)
+    x: 0
+    y: 100
+    z: 0
+    
+    # Maximum distance player can move from preview location (blocks)
+    max-distance: 10
 
   menus:
     border:
@@ -148,22 +204,6 @@ gui:
       selected: "&aSelected"
       locked: "&cLocked"
       requires-permission: "&cRequires permission"
-
-# Preview Environment Settings
-preview:
-  # Enable or disable the preview system
-  enabled: true
-  
-  # World name where previews occur (set to 'world' or your preview world name)
-  world: "world"
-  
-  # Preview location coordinates (isolated area away from players)
-  x: 0
-  y: 100
-  z: 0
-  
-  # Maximum distance player can move from preview location (blocks)
-  max-distance: 10
       select-action: "&eClick to select"
       favorite: "&6Favorite"
       favorite-label: "&6Favorite Effect"

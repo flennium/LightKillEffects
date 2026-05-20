@@ -23,8 +23,6 @@ public class EffectMenu implements Listener {
     
     private final LightKillEffects plugin;
     private final Map<UUID, MenuSession> activeSessions;
-    private final Map<UUID, Long> guiClickCooldowns;
-    private final Map<UUID, Long> previewCooldowns;
     private static final int GUI_SIZE = 54;
     private static final int[] EFFECT_SLOTS = {
         10, 11, 12, 13, 14, 15, 16,
@@ -41,8 +39,6 @@ public class EffectMenu implements Listener {
     public EffectMenu(LightKillEffects plugin) {
         this.plugin = plugin;
         this.activeSessions = new HashMap<>();
-        this.guiClickCooldowns = new HashMap<>();
-        this.previewCooldowns = new HashMap<>();
     }
     public void openMainMenu(Player player) {
         MenuSession session = new MenuSession(player, MenuType.MAIN, 0);
@@ -51,7 +47,7 @@ public class EffectMenu implements Listener {
         Inventory inventory = createMainMenu(player, session);
         player.openInventory(inventory);
         if (plugin.getConfig().getBoolean("gui.gui-sounds", true)) {
-            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
+            plugin.playUiFeedback(player, "menu-open", Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
         }
     }
     public void openCategoryMenu(Player player, String category) {
@@ -88,7 +84,7 @@ public class EffectMenu implements Listener {
         player.openInventory(inventory);
         
         if (plugin.getConfig().getBoolean("gui.gui-sounds", true)) {
-            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
+            plugin.playUiFeedback(player, "menu-open", Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
         }
         
         if (plugin.isDebugMode()) {
@@ -103,7 +99,7 @@ public class EffectMenu implements Listener {
         player.openInventory(inventory);
         
         if (plugin.getConfig().getBoolean("gui.gui-sounds", true)) {
-            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
+            plugin.playUiFeedback(player, "menu-open", Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
         }
     }
     private Inventory createMainMenu(Player player, MenuSession session) {
@@ -315,14 +311,12 @@ public class EffectMenu implements Listener {
             return;
         }
         event.setCancelled(true);
-        if (isOnGUICooldown(player)) {
-            long remaining = getRemainingGUICooldown(player);
+        if (!plugin.getFeedbackManager().tryCooldown(player, "ui", "menu-click")) {
             if (plugin.isDebugMode()) {
-                plugin.logDebug("Player " + player.getName() + " on GUI cooldown - " + remaining + "ms remaining");
+                plugin.logDebug("Suppressed repeated menu click from " + player.getName());
             }
             return;
         }
-        setGUICooldown(player);
         MenuSession session = activeSessions.get(playerId);
         ItemStack clickedItem = event.getCurrentItem();
         int slot = event.getSlot();
@@ -346,7 +340,7 @@ public class EffectMenu implements Listener {
                     break;
             }
             if (plugin.getConfig().getBoolean("gui.gui-sounds", true)) {
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
+                plugin.playUiFeedback(player, "menu-click-sound", Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
             }
         } catch (Exception e) {
             plugin.getLogger().warning("Error handling GUI click for " + player.getName() + ": " + e.getMessage());
@@ -585,10 +579,10 @@ public class EffectMenu implements Listener {
         
         if (slot == INFO_SLOT) {
             player.closeInventory();
-            player.sendMessage(plugin.getMessage("current-effect", "effect", 
-                    playerData.getSelectedEffect() != null ? playerData.getSelectedEffect().getDisplayName() : "None"));
-            player.sendMessage(plugin.getMessage("effects-available", "count", 
-                    String.valueOf(playerData.getUnlockedEffects().size())));
+            plugin.sendMessage(player, "current-effect", "effect",
+                    playerData.getSelectedEffect() != null ? playerData.getSelectedEffect().getDisplayName() : "None");
+            plugin.sendMessage(player, "effects-available", "count",
+                    String.valueOf(playerData.getUnlockedEffects().size()));
             return;
         }
         if (slot == PREV_PAGE_SLOT && session.getCurrentPage() > 0) {
@@ -755,12 +749,12 @@ public class EffectMenu implements Listener {
     private void handleEffectClick(Player player, PlayerData.PlayerEffectData playerData, EffectType effect, InventoryClickEvent event) {
         if (event.isLeftClick()) {
             if (!playerData.hasUnlockedEffect(effect)) {
-                player.sendMessage(plugin.getMessage("effect-locked", "effect", effect.getDisplayName()));
+                plugin.sendMessage(player, "effect-locked", "effect", effect.getDisplayName());
                 return;
             }
             
             if (!plugin.getPlayerData().hasEffectPermission(player, effect)) {
-                player.sendMessage(plugin.getMessage("effect-no-permission", "effect", effect.getDisplayName()));
+                plugin.sendMessage(player, "effect-no-permission", "effect", effect.getDisplayName());
                 return;
             }
             
@@ -768,14 +762,14 @@ public class EffectMenu implements Listener {
             plugin.getPlayerData().savePlayerData(player.getUniqueId());
             
             String effectName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", effect.getDisplayName());
-            player.sendMessage(plugin.getMessage("effect-set", "effect", effectName));
+            plugin.sendMessage(player, "effect-set", "effect", effectName);
             if (plugin.getConfig().getBoolean("gui.gui-sounds", true)) {
-                player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.2f);
+                plugin.playUiFeedback(player, "effect-selected", Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.2f);
             }
             
         } else if (event.isRightClick()) {
             if (!playerData.hasUnlockedEffect(effect)) {
-                player.sendMessage(plugin.getMessage("effect-locked", "effect", effect.getDisplayName()));
+                plugin.sendMessage(player, "effect-locked", "effect", effect.getDisplayName());
                 return;
             }
             
@@ -783,13 +777,13 @@ public class EffectMenu implements Listener {
             
             if (playerData.isFavorite(effect)) {
                 playerData.removeFavorite(effect);
-                player.sendMessage(plugin.getMessage("favorite-removed", "effect", effectName));
+                plugin.sendMessage(player, "favorite-removed", "effect", effectName);
             } else {
                 if (playerData.canAddFavorite()) {
                     playerData.addFavorite(effect);
-                    player.sendMessage(plugin.getMessage("favorite-added", "effect", effectName));
+                    plugin.sendMessage(player, "favorite-added", "effect", effectName);
                 } else {
-                    player.sendMessage(plugin.getMessage("favorites-full"));
+                    plugin.sendMessage(player, "favorites-full");
                 }
             }
             
@@ -802,12 +796,12 @@ public class EffectMenu implements Listener {
             
             if (plugin.getPreviewManager().isOnCooldown(player)) {
                 long remaining = plugin.getPreviewManager().getRemainingCooldown(player);
-                player.sendMessage(plugin.getMessage("preview-cooldown", "seconds", String.valueOf(remaining)));
+                plugin.sendMessage(player, "preview-cooldown", "seconds", String.valueOf(remaining));
                 return;
             }
             
-            if (player.hasPermission("killeffects.preview.all")
-                    || (plugin.getPlayerData().hasEffectPermission(player, effect)
+            if (plugin.getPermissionManager().canPreviewAll(player)
+                    || (plugin.getPermissionManager().canAccessEffect(player, effect.getConfigKey())
                     && (!plugin.getSettings().requirePreviewUnlock() || playerData.hasUnlockedEffect(effect)))) {
                 
                 if (plugin.getPreviewManager().startPreview(player, effect.getDisplayName())) {
@@ -820,10 +814,10 @@ public class EffectMenu implements Listener {
                     plugin.getEffectManager().executeEffect(player, effectLoc, effect);
                     
                     String effectName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", effect.getDisplayName());
-                    player.sendMessage(plugin.getMessage("effect-previewed", "effect", effectName));
+                    plugin.sendMessage(player, "effect-previewed", "effect", effectName);
                 }
             } else {
-                player.sendMessage(plugin.getMessage("no-permission"));
+                plugin.sendMessage(player, "no-permission");
             }
         }
     }
@@ -845,72 +839,6 @@ public class EffectMenu implements Listener {
         public String getCurrentCategory() { return currentCategory; }
         public void setCurrentCategory(String currentCategory) { this.currentCategory = currentCategory; }
     }
-    private boolean isOnGUICooldown(Player player) {
-        UUID playerId = player.getUniqueId();
-        if (!guiClickCooldowns.containsKey(playerId)) {
-            return false;
-        }
-        
-        long cooldownEnd = guiClickCooldowns.get(playerId);
-        if (System.currentTimeMillis() >= cooldownEnd) {
-            guiClickCooldowns.remove(playerId);
-            return false;
-        }
-        
-        return true;
-    }
-    private void setGUICooldown(Player player) {
-        long cooldownMs = plugin.getConfig().getLong("gui.click-cooldown-ms", 200);
-        guiClickCooldowns.put(player.getUniqueId(), System.currentTimeMillis() + cooldownMs);
-    }
-    private long getRemainingGUICooldown(Player player) {
-        UUID playerId = player.getUniqueId();
-        if (!guiClickCooldowns.containsKey(playerId)) {
-            return 0;
-        }
-        
-        long cooldownEnd = guiClickCooldowns.get(playerId);
-        long remaining = cooldownEnd - System.currentTimeMillis();
-        return Math.max(0, remaining);
-    }
-    private boolean isOnPreviewCooldown(Player player) {
-        UUID playerId = player.getUniqueId();
-        if (!previewCooldowns.containsKey(playerId)) {
-            return false;
-        }
-        
-        long cooldownEnd = previewCooldowns.get(playerId);
-        if (System.currentTimeMillis() >= cooldownEnd) {
-            previewCooldowns.remove(playerId);
-            return false;
-        }
-        
-        return true;
-    }
-    private void setPreviewCooldown(Player player) {
-        long cooldownSeconds = plugin.getConfig().getLong("gui.preview.cooldown", 5);
-        previewCooldowns.put(player.getUniqueId(), System.currentTimeMillis() + (cooldownSeconds * 1000));
-    }
-    private long getRemainingPreviewCooldown(Player player) {
-        UUID playerId = player.getUniqueId();
-        if (!previewCooldowns.containsKey(playerId)) {
-            return 0;
-        }
-        
-        long cooldownEnd = previewCooldowns.get(playerId);
-        long remaining = cooldownEnd - System.currentTimeMillis();
-        return Math.max(0, remaining / 1000);
-    }
-    public boolean isPlayerOnPreviewCooldown(Player player) {
-        return isOnPreviewCooldown(player);
-    }
-    public void setPlayerPreviewCooldown(Player player) {
-        setPreviewCooldown(player);
-    }
-    public long getPlayerRemainingPreviewCooldown(Player player) {
-        return getRemainingPreviewCooldown(player);
-    }
-    
     private enum MenuType {
         MAIN, CATEGORY, FAVORITES
     }

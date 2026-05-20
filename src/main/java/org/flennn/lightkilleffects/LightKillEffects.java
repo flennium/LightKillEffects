@@ -9,6 +9,7 @@ import org.flennn.lightkilleffects.command.KillEffectCommand;
 import org.flennn.lightkilleffects.config.PluginSettings;
 import org.flennn.lightkilleffects.effect.EffectType;
 import org.flennn.lightkilleffects.effect.KillEffectManager;
+import org.flennn.lightkilleffects.feedback.FeedbackManager;
 import org.flennn.lightkilleffects.listener.KillListener;
 import org.flennn.lightkilleffects.menu.EffectMenu;
 import org.flennn.lightkilleffects.permission.PermissionManager;
@@ -28,6 +29,7 @@ public class LightKillEffects extends JavaPlugin {
     private PlayerData playerData;
     private EffectMenu effectMenu;
     private PluginSettings settings;
+    private FeedbackManager feedbackManager;
     private PreviewEnvironmentManager previewManager;
     private PermissionManager permissionManager;
     private FileConfiguration categoriesConfig;
@@ -89,6 +91,7 @@ public class LightKillEffects extends JavaPlugin {
         this.effectsConfig = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "effects.yml"));
         this.messagesConfig = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "messages.yml"));
         this.settings = new PluginSettings(getConfig());
+        this.feedbackManager = new FeedbackManager(this);
         validateConfigValues();
         this.debugMode = this.settings.isDebug();
 
@@ -105,6 +108,8 @@ public class LightKillEffects extends JavaPlugin {
         changed |= setIfBelow("performance.particle-render-distance", 1, 32);
         changed |= setIfBelow("performance.cleanup-interval", 20, 200);
         changed |= setIfBelow("storage.max-backups", 1, 10);
+        changed |= setIfBelow("feedback-cooldowns.chat.default-ms", 0, 1200);
+        changed |= setIfBelow("feedback-cooldowns.ui.default-ms", 0, 250);
 
         int guiSize = getConfig().getInt("gui.size", 54);
         if (guiSize % 9 != 0 || guiSize < 9 || guiSize > 54) {
@@ -216,6 +221,30 @@ public class LightKillEffects extends JavaPlugin {
         return Console.color(prefix + message);
     }
 
+    public boolean sendMessage(org.bukkit.command.CommandSender sender, String key) {
+        return this.feedbackManager.send(sender, key, getMessage(key));
+    }
+
+    public boolean sendMessage(org.bukkit.command.CommandSender sender, String key, String placeholder, String value) {
+        return this.feedbackManager.send(sender, key, getMessage(key, placeholder, value));
+    }
+
+    public boolean sendMessage(org.bukkit.command.CommandSender sender, String key, String... replacements) {
+        String message = getMessage(key);
+        for (int i = 0; i + 1 < replacements.length; i += 2) {
+            message = message.replace("{" + replacements[i] + "}", replacements[i + 1]);
+        }
+        return this.feedbackManager.send(sender, key, message);
+    }
+
+    public boolean sendRawMessage(org.bukkit.command.CommandSender sender, String key, String message) {
+        return this.feedbackManager.send(sender, key, Console.color(message));
+    }
+
+    public boolean playUiFeedback(org.bukkit.entity.Player player, String key, org.bukkit.Sound sound, float volume, float pitch) {
+        return this.feedbackManager.playUi(player, key, sound, volume, pitch);
+    }
+
     public FileConfiguration getCategoriesConfig() {
         return this.categoriesConfig;
     }
@@ -264,6 +293,10 @@ public class LightKillEffects extends JavaPlugin {
 
     public PluginSettings getSettings() {
         return this.settings;
+    }
+
+    public FeedbackManager getFeedbackManager() {
+        return this.feedbackManager;
     }
 
     public boolean isDebugMode() {

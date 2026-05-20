@@ -28,12 +28,14 @@ permissions:
       killeffects.reload: true
       killeffects.set.others: true
       killeffects.preview.all: true
+      killeffects.admin.see-previews: true
   
   killeffects.use:
     description: Basic permission to use kill effects
     default: true
     children:
       killeffects.gui: true
+      killeffects.preview: true
   
   killeffects.use.*:
     description: Access to all kill effects
@@ -156,4 +158,12 @@ permissions:
   
   killeffects.preview.all:
     description: Preview any kill effect
+    default: op
+
+  killeffects.preview:
+    description: Preview unlocked kill effects
+    default: true
+
+  killeffects.admin.see-previews:
+    description: See players while they are in the preview area
     default: op

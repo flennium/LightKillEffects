@@ -3,7 +3,6 @@ package org.flennn.lightkilleffects.permission;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.flennn.lightkilleffects.LightKillEffects;
-import org.flennn.lightkilleffects.util.Console;
 
 public class PermissionManager {
     private final LightKillEffects plugin;
@@ -71,28 +70,29 @@ public class PermissionManager {
     }
 
     public boolean canAccessEffect(CommandSender sender, String effectName) {
-        if (hasPermission(sender, "killeffects.effect." + effectName.toLowerCase()) ||
+        String key = effectName == null ? "" : effectName.toLowerCase(java.util.Locale.ROOT);
+        if (hasPermission(sender, "killeffects.use." + key) ||
+            hasPermission(sender, "killeffects.use.*") ||
+            hasPermission(sender, "killeffects.effect." + key) ||
             hasPermission(sender, "killeffects.effect.*")) {
             return true;
         }
-        denyMessage(sender, "killeffects.effect." + effectName.toLowerCase());
+        denyMessage(sender, "killeffects.use." + key);
         return false;
     }
 
     public boolean canPreview(CommandSender sender) {
-        if (hasPermission(sender, "killeffects.preview.use") ||
+        if (hasPermission(sender, "killeffects.preview") ||
+            hasPermission(sender, "killeffects.preview.use") ||
             hasPermission(sender, "killeffects.preview.all")) {
             return true;
         }
-        denyMessage(sender, "killeffects.preview.use");
+        denyMessage(sender, "killeffects.preview");
         return false;
     }
 
     public boolean canPreviewAll(CommandSender sender) {
-        if (hasPermission(sender, "killeffects.preview.all")) {
-            return true;
-        }
-        return false;
+        return hasPermission(sender, "killeffects.preview.all");
     }
 
     public boolean canReload(CommandSender sender) {
@@ -111,13 +111,14 @@ public class PermissionManager {
     }
 
     public boolean canSeePreviewPlayers(CommandSender sender) {
-        if (hasPermission(sender, "killeffects.admin.see-previews")) {
-            return true;
-        }
-        return false;
+        return hasPermission(sender, "killeffects.admin.see-previews");
     }
 
     public boolean hasPermission(CommandSender sender, String permission) {
+        if (sender == null || permission == null || permission.isEmpty()) {
+            return false;
+        }
+
         if (sender.isOp()) {
             return true;
         }
@@ -128,7 +129,7 @@ public class PermissionManager {
 
         if (permission.contains(".")) {
             String[] parts = permission.split("\\.");
-            String wildcard = String.join(".", parts, 0, parts.length - 1) + ".*";
+            String wildcard = String.join(".", java.util.Arrays.copyOf(parts, parts.length - 1)) + ".*";
             if (sender.hasPermission(wildcard)) {
                 return true;
             }
@@ -144,14 +145,11 @@ public class PermissionManager {
     private void denyMessage(CommandSender sender, String permission) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            String message = plugin.getConfig().getString("messages.no-permission", 
-                "&cYou do not have permission to do this.");
-            
             if (plugin.isDebugMode()) {
-                message += " &7(Permission: " + permission + ")";
+                plugin.sendRawMessage(player, "no-permission-" + permission, plugin.getMessage("no-permission") + " &7(Permission: " + permission + ")");
+            } else {
+                plugin.sendMessage(player, "no-permission");
             }
-            
-            player.sendMessage(Console.color(message));
         }
     }
 
@@ -159,7 +157,7 @@ public class PermissionManager {
         plugin.logInfo("Permission system loaded:");
         plugin.logInfo("  - Basic: killeffects.use");
         plugin.logInfo("  - GUI: killeffects.gui, killeffects.gui.*");
-        plugin.logInfo("  - Effects: killeffects.effect.*, killeffects.effect.<name>");
+        plugin.logInfo("  - Effects: killeffects.use.*, killeffects.use.<name>");
         plugin.logInfo("  - Preview: killeffects.preview.*, killeffects.preview.all");
         plugin.logInfo("  - Admin: killeffects.reload, killeffects.admin");
     }

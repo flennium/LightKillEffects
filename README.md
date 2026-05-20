@@ -9,7 +9,7 @@ Built for servers that want polished kill feedback without heavy dependencies or
 - 20 built-in kill effects
 - Inventory GUI with categories and favorites
 - Per-effect permissions
-- Optional previews with cooldowns
+- Safer preview arena with cooldowns, auto-exit, and command controls
 - Player kill and effect usage stats
 - Configurable particles, sounds, render distance, cooldowns, categories, effects, and messages
 - YAML, JSON, or SQLite player data storage
@@ -38,6 +38,7 @@ Built for servers that want polished kill feedback without heavy dependencies or
 | `/killeffects set <effect>` | `killeffects.use` | Select an effect |
 | `/killeffects set none` | `killeffects.use` | Disable your effect |
 | `/killeffects preview <effect>` | `killeffects.use` | Preview an effect |
+| `/killeffects exit` | `killeffects.use` | Leave an active preview |
 | `/killeffects favorite <add/remove> <effect>` | `killeffects.use` | Manage favorites |
 | `/killeffects info` | `killeffects.use` | Show your current effect and stats |
 | `/killeffects reload` | `killeffects.reload` | Reload config |
@@ -48,9 +49,11 @@ Aliases: `/ke`, `/effects`
 
 - `killeffects.use` - basic access
 - `killeffects.gui` - open the GUI
+- `killeffects.preview` - preview unlocked effects
 - `killeffects.reload` - reload config
 - `killeffects.set.others` - set effects for other players
 - `killeffects.preview.all` - preview any effect
+- `killeffects.admin.see-previews` - see players while they are in preview
 - `killeffects.use.*` - access all effects
 - `killeffects.use.<effect>` - access one effect
 - `killeffects.*` - all permissions

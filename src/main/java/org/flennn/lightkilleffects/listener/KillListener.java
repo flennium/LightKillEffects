@@ -97,7 +97,7 @@ public class KillListener implements Listener {
                 if (plugin.getConfig().getBoolean("general.notify-on-unlock", true)) {
                     String effectName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", 
                                                                     effect.getDisplayName());
-                    player.sendMessage(plugin.getMessage("effect-unlocked", "effect", effectName));
+                    plugin.sendMessage(player, "effect-unlocked", "effect", effectName);
                 }
             } else if (!hasPermission && hasUnlocked && effect.requiresPermission()) {
                 plugin.getPlayerData().lockEffect(player.getUniqueId(), effect);
@@ -106,7 +106,7 @@ public class KillListener implements Listener {
                 if (plugin.getConfig().getBoolean("general.notify-on-lock", true)) {
                     String effectName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", 
                                                                     effect.getDisplayName());
-                    player.sendMessage(plugin.getMessage("effect-locked-notification", "effect", effectName));
+                    plugin.sendMessage(player, "effect-locked-notification", "effect", effectName);
                 }
             }
         }

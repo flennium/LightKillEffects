@@ -4,6 +4,8 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleExitEvent;
@@ -46,14 +48,14 @@ public class PreviewListener implements Listener {
                 command.startsWith("/warp ") || command.startsWith("/home ") ||
                 command.startsWith("/spawn ") || command.startsWith("/back ")) {
             event.setCancelled(true);
-            player.sendMessage(plugin.getMessage("preview-blocked-command"));
+            plugin.sendMessage(player, "preview-blocked-command");
             plugin.logDebug("Blocked command during preview: " + command);
             return;
         }
 
         if (command.startsWith("/quit") || command.startsWith("/logout")) {
             event.setCancelled(true);
-            player.sendMessage(plugin.getMessage("preview-cannot-quit"));
+            plugin.sendMessage(player, "preview-cannot-quit");
             plugin.logDebug("Blocked quit attempt during preview for " + player.getName());
             return;
         }
@@ -64,7 +66,7 @@ public class PreviewListener implements Listener {
 
             if (!isWhitelistedCommand(cmd)) {
                 event.setCancelled(true);
-                player.sendMessage(plugin.getMessage("preview-commands-disabled"));
+                plugin.sendMessage(player, "preview-commands-disabled");
                 plugin.logDebug("Blocked command during preview: " + command);
             }
         }
@@ -115,7 +117,7 @@ public class PreviewListener implements Listener {
         if (session != null) {
             if (!event.getTo().getWorld().equals(session.getPreviewLocation().getWorld())) {
                 event.setCancelled(true);
-                player.sendMessage(plugin.getMessage("preview-cannot-teleport"));
+                plugin.sendMessage(player, "preview-cannot-teleport");
                 plugin.logDebug("Blocked teleport attempt during preview: " + player.getName());
             }
         }
@@ -195,25 +197,32 @@ public class PreviewListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        previewManager.validateBoatIntegrity(player);
-
         PreviewSession session = previewManager.getSession(player);
-        if (session != null) {
-            double maxDistance = plugin.getConfig().getDouble("preview.max-distance", 10);
-            if (event.getTo().distance(session.getPreviewLocation()) > maxDistance) {
-                event.setTo(session.getPreviewLocation());
-                player.sendMessage(plugin.getMessage("preview-boundary-exceeded"));
-                plugin.logDebug("Teleported " + player.getName() + " back to preview boundary");
-            }
+        if (session == null || !session.isActive()) {
+            return;
+        }
+
+        previewManager.validateBoatIntegrity(player);
+        if (event.getTo() == null || event.getTo().getWorld() == null || session.getPreviewLocation().getWorld() == null) {
+            return;
+        }
+
+        double maxDistance = plugin.getConfig().getDouble("gui.preview.max-distance",
+                plugin.getConfig().getDouble("preview.max-distance", 10));
+        if (!event.getTo().getWorld().equals(session.getPreviewLocation().getWorld())
+                || event.getTo().distanceSquared(session.getPreviewLocation()) > maxDistance * maxDistance) {
+            event.setTo(session.getPreviewLocation());
+            plugin.sendMessage(player, "preview-boundary-exceeded");
+            plugin.logDebug("Teleported " + player.getName() + " back to preview boundary");
         }
     }
 
     private boolean isSafeCommand(String command) {
-        return command.toLowerCase().contains("/me ") || 
-               command.toLowerCase().contains("/say ");
+        String lower = command.toLowerCase();
+        return lower.startsWith("/me ") || lower.startsWith("/say ");
     }
 
     private boolean isWhitelistedCommand(String cmd) {
