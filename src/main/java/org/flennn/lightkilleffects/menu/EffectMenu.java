@@ -830,7 +830,8 @@ public class EffectMenu implements Listener {
             if (plugin.getPermissionManager().canPreviewAll(player)
                     || (plugin.getPermissionManager().canAccessEffect(player, effect.getConfigKey())
                     && (!plugin.getSettings().requirePreviewUnlock() || playerData.hasUnlockedEffect(effect)))) {
-                
+                player.closeInventory();
+
                 if (plugin.getPreviewManager().startPreview(player, effect.getDisplayName())) {
                     org.bukkit.Location effectLoc = player.getLocation().add(
                             player.getLocation().getDirection().multiply(
