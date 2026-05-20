@@ -4,3 +4,4 @@ target/
 .vscode/
 *.log
 dependency-reduced-pom.xml
+showcase*.mp4
