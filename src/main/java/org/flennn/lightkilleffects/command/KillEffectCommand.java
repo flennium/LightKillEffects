@@ -171,6 +171,11 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(plugin.getMessage("usage-preview"));
             return true;
         }
+
+        if (!plugin.getPermissionManager().canPreview(player)) {
+            return true;
+        }
+
         EffectType effect = EffectType.fromConfigKey(args[1]);
         if (effect == null) {
             effect = EffectType.fromDisplayName(args[1]);
@@ -180,18 +185,8 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(plugin.getMessage("effect-not-found", "effect", args[1]));
             return true;
         }
-        if (!plugin.getConfig().getBoolean("gui.preview.enabled", true)) {
-            player.sendMessage(plugin.getMessage("preview-disabled"));
-            return true;
-        }
-        if (plugin.getEffectMenu().isPlayerOnPreviewCooldown(player)) {
-            long remaining = plugin.getEffectMenu().getPlayerRemainingPreviewCooldown(player);
-            player.sendMessage(plugin.getMessage("preview-cooldown", "seconds", String.valueOf(remaining)));
-            return true;
-        }
-        if (!player.hasPermission("killeffects.preview.all") && 
-            !plugin.getPlayerData().hasEffectPermission(player, effect)) {
-            player.sendMessage(plugin.getMessage("no-permission"));
+
+        if (!plugin.getPermissionManager().canAccessEffect(player, effect.getConfigKey())) {
             return true;
         }
 
@@ -201,17 +196,25 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(plugin.getMessage("effect-locked", "effect", effect.getDisplayName()));
             return true;
         }
-        org.bukkit.Location previewLocation = player.getLocation().add(
-                player.getLocation().getDirection().multiply(
-                        plugin.getConfig().getInt("gui.preview.location-offset", 3)
-                )
-        );
-        plugin.getEffectMenu().setPlayerPreviewCooldown(player);
-        plugin.getEffectManager().executeEffect(player, previewLocation, effect);
-        
-        String effectDisplayName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", 
-                                                                effect.getDisplayName());
-        player.sendMessage(plugin.getMessage("effect-previewed", "effect", effectDisplayName));
+
+        if (plugin.getPreviewManager().isOnCooldown(player)) {
+            long remaining = plugin.getPreviewManager().getRemainingCooldown(player);
+            player.sendMessage(plugin.getMessage("preview-cooldown", "seconds", String.valueOf(remaining)));
+            return true;
+        }
+
+        if (plugin.getPreviewManager().startPreview(player, effect.getDisplayName())) {
+            org.bukkit.Location effectLoc = player.getLocation().add(
+                    player.getLocation().getDirection().multiply(
+                            plugin.getConfig().getInt("gui.preview.location-offset", 3)
+                    )
+            );
+            plugin.getEffectManager().executeEffect(player, effectLoc, effect);
+            
+            String effectDisplayName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", 
+                                                                    effect.getDisplayName());
+            player.sendMessage(plugin.getMessage("effect-previewed", "effect", effectDisplayName));
+        }
         
         return true;
     }

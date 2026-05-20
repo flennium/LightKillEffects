@@ -11,6 +11,9 @@ import org.flennn.lightkilleffects.effect.EffectType;
 import org.flennn.lightkilleffects.effect.KillEffectManager;
 import org.flennn.lightkilleffects.listener.KillListener;
 import org.flennn.lightkilleffects.menu.EffectMenu;
+import org.flennn.lightkilleffects.permission.PermissionManager;
+import org.flennn.lightkilleffects.preview.PreviewEnvironmentManager;
+import org.flennn.lightkilleffects.preview.PreviewListener;
 import org.flennn.lightkilleffects.storage.PlayerData;
 import org.flennn.lightkilleffects.storage.StorageHandler;
 import org.flennn.lightkilleffects.util.Console;
@@ -25,6 +28,8 @@ public class LightKillEffects extends JavaPlugin {
     private PlayerData playerData;
     private EffectMenu effectMenu;
     private PluginSettings settings;
+    private PreviewEnvironmentManager previewManager;
+    private PermissionManager permissionManager;
     private FileConfiguration categoriesConfig;
     private FileConfiguration effectsConfig;
     private FileConfiguration messagesConfig;
@@ -61,6 +66,10 @@ public class LightKillEffects extends JavaPlugin {
         if (this.effectManager != null) {
             this.effectManager.cleanup();
             this.effectManager.clearAllTemporaryBlocks();
+        }
+
+        if (this.previewManager != null) {
+            this.previewManager.cleanup();
         }
 
         if (this.storageHandler != null) {
@@ -124,6 +133,8 @@ public class LightKillEffects extends JavaPlugin {
             this.playerData = new PlayerData(this, this.storageHandler);
             this.effectManager = new KillEffectManager(this);
             this.effectMenu = new EffectMenu(this);
+            this.previewManager = new PreviewEnvironmentManager(this);
+            this.permissionManager = new PermissionManager(this);
             Console.success("Core components initialized.");
         } catch (Exception e) {
             Console.error("Failed to initialize core components: " + e.getMessage());
@@ -135,6 +146,7 @@ public class LightKillEffects extends JavaPlugin {
     private void registerEvents() {
         getServer().getPluginManager().registerEvents(this.effectMenu, this);
         getServer().getPluginManager().registerEvents(new KillListener(this), this);
+        getServer().getPluginManager().registerEvents(new PreviewListener(this, this.previewManager), this);
         logDebug("Event listeners registered");
     }
 
@@ -192,6 +204,10 @@ public class LightKillEffects extends JavaPlugin {
         if (this.debugMode) {
             Console.info("&7[DEBUG] " + message);
         }
+    }
+
+    public void logWarn(String message) {
+        Console.warn(message);
     }
 
     public String getMessage(String key) {
@@ -252,5 +268,13 @@ public class LightKillEffects extends JavaPlugin {
 
     public boolean isDebugMode() {
         return this.debugMode;
+    }
+
+    public PreviewEnvironmentManager getPreviewManager() {
+        return this.previewManager;
+    }
+
+    public PermissionManager getPermissionManager() {
+        return this.permissionManager;
     }
 }

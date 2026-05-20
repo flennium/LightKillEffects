@@ -1,0 +1,230 @@
+package org.flennn.lightkilleffects.preview;
+
+import org.bukkit.entity.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.player.*;
+import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.event.world.PortalCreateEvent;
+import org.flennn.lightkilleffects.LightKillEffects;
+import org.flennn.lightkilleffects.util.Console;
+
+public class PreviewListener implements Listener {
+    private final LightKillEffects plugin;
+    private final PreviewEnvironmentManager previewManager;
+
+    public PreviewListener(LightKillEffects plugin, PreviewEnvironmentManager previewManager) {
+        this.plugin = plugin;
+        this.previewManager = previewManager;
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onVehicleExit(VehicleExitEvent event) {
+        if (!(event.getExited() instanceof Player)) {
+            return;
+        }
+
+        Player player = (Player) event.getExited();
+        if (previewManager.isInPreview(player)) {
+            event.setCancelled(true);
+            plugin.logDebug("Blocked dismount attempt for " + player.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+        Player player = event.getPlayer();
+        if (!previewManager.isInPreview(player)) {
+            return;
+        }
+
+        String command = event.getMessage().toLowerCase();
+
+        if (command.startsWith("/tp ") || command.startsWith("/teleport ") ||
+                command.startsWith("/warp ") || command.startsWith("/home ") ||
+                command.startsWith("/spawn ") || command.startsWith("/back ")) {
+            event.setCancelled(true);
+            player.sendMessage(plugin.getMessage("preview-blocked-command"));
+            plugin.logDebug("Blocked command during preview: " + command);
+            return;
+        }
+
+        if (command.startsWith("/quit") || command.startsWith("/logout")) {
+            event.setCancelled(true);
+            player.sendMessage(plugin.getMessage("preview-cannot-quit"));
+            plugin.logDebug("Blocked quit attempt during preview for " + player.getName());
+            return;
+        }
+
+        if (command.startsWith("/") && !isSafeCommand(command)) {
+            String[] parts = command.split(" ");
+            String cmd = parts[0].substring(1).toLowerCase();
+
+            if (!isWhitelistedCommand(cmd)) {
+                event.setCancelled(true);
+                player.sendMessage(plugin.getMessage("preview-commands-disabled"));
+                plugin.logDebug("Blocked command during preview: " + command);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player)) {
+            return;
+        }
+
+        Player player = (Player) event.getEntity();
+        if (previewManager.isInPreview(player)) {
+            event.setCancelled(true);
+            plugin.logDebug("Blocked damage during preview for " + player.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        if (previewManager.isInPreview(player)) {
+            event.setDeathMessage(null);
+            previewManager.endPreview(player);
+            plugin.logDebug("Ended preview due to player death: " + player.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        PreviewSession session = previewManager.getSession(player);
+        
+        if (session != null) {
+            event.setRespawnLocation(session.getPreviewLocation());
+            plugin.logDebug("Respawned player in preview location: " + player.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
+        Player player = event.getPlayer();
+        if (!previewManager.isInPreview(player)) {
+            return;
+        }
+
+        PreviewSession session = previewManager.getSession(player);
+        if (session != null) {
+            if (!event.getTo().getWorld().equals(session.getPreviewLocation().getWorld())) {
+                event.setCancelled(true);
+                player.sendMessage(plugin.getMessage("preview-cannot-teleport"));
+                plugin.logDebug("Blocked teleport attempt during preview: " + player.getName());
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        if (previewManager.isInPreview(player)) {
+            event.setCancelled(true);
+            plugin.logDebug("Blocked interaction during preview: " + player.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
+        if (previewManager.isInPreview(player)) {
+            event.setCancelled(true);
+            plugin.logDebug("Blocked entity interaction during preview: " + player.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        if (previewManager.isInPreview(player)) {
+            event.setCancelled(true);
+            plugin.logDebug("Blocked block break during preview: " + player.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        if (previewManager.isInPreview(player)) {
+            event.setCancelled(true);
+            plugin.logDebug("Blocked block place during preview: " + player.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPortalCreate(PortalCreateEvent event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof Player) {
+            Player player = (Player) entity;
+            if (previewManager.isInPreview(player)) {
+                event.setCancelled(true);
+                plugin.logDebug("Blocked portal creation during preview: " + player.getName());
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        previewManager.removeStaleSession(player.getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
+        if (previewManager.isInPreview(player)) {
+            event.setCancelled(true);
+            plugin.logDebug("Blocked item drop during preview: " + player.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onInventoryOpen(org.bukkit.event.inventory.InventoryOpenEvent event) {
+        if (event.getPlayer() instanceof Player) {
+            Player player = (Player) event.getPlayer();
+            if (previewManager.isInPreview(player)) {
+                event.setCancelled(true);
+                plugin.logDebug("Blocked inventory open during preview: " + player.getName());
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        previewManager.validateBoatIntegrity(player);
+
+        PreviewSession session = previewManager.getSession(player);
+        if (session != null) {
+            double maxDistance = plugin.getConfig().getDouble("preview.max-distance", 10);
+            if (event.getTo().distance(session.getPreviewLocation()) > maxDistance) {
+                event.setTo(session.getPreviewLocation());
+                player.sendMessage(plugin.getMessage("preview-boundary-exceeded"));
+                plugin.logDebug("Teleported " + player.getName() + " back to preview boundary");
+            }
+        }
+    }
+
+    private boolean isSafeCommand(String command) {
+        return command.toLowerCase().contains("/me ") || 
+               command.toLowerCase().contains("/say ");
+    }
+
+    private boolean isWhitelistedCommand(String cmd) {
+        String[] whitelist = {
+            "me", "say", "killeffects", "ke", "effects"
+        };
+        for (String w : whitelist) {
+            if (cmd.equals(w)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}

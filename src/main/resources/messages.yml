@@ -42,6 +42,14 @@ messages:
   not-favorite: "&e{effect} is not in your favorites!"
   preview-disabled: "&cEffect previews are currently disabled!"
   preview-cooldown: "&cYou must wait {seconds} seconds before previewing another effect!"
+  already-in-preview: "&cYou are already in a preview! Type /killeffects to exit."
+  preview-location-not-set: "&cPreview location is not configured!"
+  preview-mount-failed: "&cFailed to mount you for the preview. Please try again."
+  preview-blocked-command: "&cThat command cannot be used during previews!"
+  preview-cannot-quit: "&cYou cannot quit during a preview. Type /killeffects to exit."
+  preview-commands-disabled: "&cCommands are disabled during previews."
+  preview-cannot-teleport: "&cYou cannot teleport during a preview!"
+  preview-boundary-exceeded: "&cYou cannot go that far during a preview!"
   
   # Command help
   help:

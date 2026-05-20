@@ -796,13 +796,12 @@ public class EffectMenu implements Listener {
             plugin.getPlayerData().savePlayerData(player.getUniqueId());
             
         } else if (event.isShiftClick() || event.getClick() == ClickType.MIDDLE) {
-            if (!plugin.getConfig().getBoolean("gui.preview.enabled", true)) {
-                player.sendMessage(plugin.getMessage("preview-disabled"));
+            if (!plugin.getPermissionManager().canPreview(player)) {
                 return;
             }
             
-            if (isOnPreviewCooldown(player)) {
-                long remaining = getRemainingPreviewCooldown(player);
+            if (plugin.getPreviewManager().isOnCooldown(player)) {
+                long remaining = plugin.getPreviewManager().getRemainingCooldown(player);
                 player.sendMessage(plugin.getMessage("preview-cooldown", "seconds", String.valueOf(remaining)));
                 return;
             }
@@ -811,17 +810,18 @@ public class EffectMenu implements Listener {
                     || (plugin.getPlayerData().hasEffectPermission(player, effect)
                     && (!plugin.getSettings().requirePreviewUnlock() || playerData.hasUnlockedEffect(effect)))) {
                 
-                org.bukkit.Location previewLocation = player.getLocation().add(
-                        player.getLocation().getDirection().multiply(
-                                plugin.getConfig().getInt("gui.preview.location-offset", 3)
-                        )
-                );
-                
-                setPreviewCooldown(player);
-                plugin.getEffectManager().executeEffect(player, previewLocation, effect);
-                
-                String effectName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", effect.getDisplayName());
-                player.sendMessage(plugin.getMessage("effect-previewed", "effect", effectName));
+                if (plugin.getPreviewManager().startPreview(player, effect.getDisplayName())) {
+                    org.bukkit.Location effectLoc = player.getLocation().add(
+                            player.getLocation().getDirection().multiply(
+                                    plugin.getConfig().getInt("gui.preview.location-offset", 3)
+                            )
+                    );
+                    
+                    plugin.getEffectManager().executeEffect(player, effectLoc, effect);
+                    
+                    String effectName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", effect.getDisplayName());
+                    player.sendMessage(plugin.getMessage("effect-previewed", "effect", effectName));
+                }
             } else {
                 player.sendMessage(plugin.getMessage("no-permission"));
             }

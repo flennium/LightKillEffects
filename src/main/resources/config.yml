@@ -148,6 +148,22 @@ gui:
       selected: "&aSelected"
       locked: "&cLocked"
       requires-permission: "&cRequires permission"
+
+# Preview Environment Settings
+preview:
+  # Enable or disable the preview system
+  enabled: true
+  
+  # World name where previews occur (set to 'world' or your preview world name)
+  world: "world"
+  
+  # Preview location coordinates (isolated area away from players)
+  x: 0
+  y: 100
+  z: 0
+  
+  # Maximum distance player can move from preview location (blocks)
+  max-distance: 10
       select-action: "&eClick to select"
       favorite: "&6Favorite"
       favorite-label: "&6Favorite Effect"
