@@ -111,7 +111,7 @@ public class KillEffectManager {
     void executeLightningStorm(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 60;
+            final int maxTicks = effectDuration("lightning_storm", 60);
             
             @Override
             public void run() {
@@ -147,7 +147,7 @@ public class KillEffectManager {
     void executeSolarExplosion(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 80;
+            final int maxTicks = effectDuration("solar_explosion", 80);
             
             @Override
             public void run() {
@@ -188,7 +188,7 @@ public class KillEffectManager {
     void executeFrozenBurst(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 70;
+            final int maxTicks = effectDuration("frozen_burst", 70);
             
             @Override
             public void run() {
@@ -241,7 +241,7 @@ public class KillEffectManager {
     void executeNeonRave(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 100;
+            final int maxTicks = effectDuration("neon_rave", 100);
             final Color[] neonColors = {
                     Color.RED, Color.LIME, Color.BLUE, Color.YELLOW, 
                     Color.PURPLE, Color.AQUA, Color.FUCHSIA, Color.ORANGE
@@ -293,7 +293,7 @@ public class KillEffectManager {
     void executeStarfallCascade(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 120;
+            final int maxTicks = effectDuration("starfall_cascade", 120);
             final List<Star> stars = new ArrayList<>();
             
             @Override
@@ -342,7 +342,7 @@ public class KillEffectManager {
     void executePrismaticShatter(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 60;
+            final int maxTicks = effectDuration("prismatic_shatter", 60);
             
             @Override
             public void run() {
@@ -470,6 +470,10 @@ public class KillEffectManager {
         int green = (int) Math.round(start.getGreen() + ((end.getGreen() - start.getGreen()) * clamped));
         int blue = (int) Math.round(start.getBlue() + ((end.getBlue() - start.getBlue()) * clamped));
         return Color.fromRGB(red, green, blue);
+    }
+
+    private int effectDuration(String effectKey, int fallback) {
+        return Math.max(20, plugin.getEffectsConfig().getInt("effects." + effectKey + ".duration", fallback));
     }
     
     private List<Player> getNearbyPlayers(Location location) {
@@ -714,7 +718,7 @@ public class KillEffectManager {
     void executeStormCage(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 90;
+            final int maxTicks = effectDuration("storm_cage", 90);
 
             @Override
             public void run() {
@@ -778,7 +782,7 @@ public class KillEffectManager {
     void executePhantomWaltz(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 110;
+            final int maxTicks = effectDuration("phantom_waltz", 110);
 
             @Override
             public void run() {
@@ -828,7 +832,7 @@ public class KillEffectManager {
     void executeMirrorBreak(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 80;
+            final int maxTicks = effectDuration("mirror_break", 80);
             boolean shattered = false;
             final List<MirrorShard> shards = new ArrayList<>();
             final Color[] glassColors = {
@@ -912,7 +916,7 @@ public class KillEffectManager {
     void executeRoyalExecution(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 100;
+            final int maxTicks = effectDuration("royal_execution", 100);
 
             @Override
             public void run() {
@@ -971,7 +975,7 @@ public class KillEffectManager {
     void executeSakuraCollapse(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 100;
+            final int maxTicks = effectDuration("sakura_collapse", 100);
             final List<Petal> petals = new ArrayList<>();
             final Color[] petalColors = {
                     Color.fromRGB(255, 196, 214),
@@ -1034,7 +1038,7 @@ public class KillEffectManager {
     void executeAlchemyFailure(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 110;
+            final int maxTicks = effectDuration("alchemy_failure", 110);
             final Color[] colors = {
                     Color.fromRGB(117, 255, 143),
                     Color.fromRGB(140, 210, 255),
@@ -1083,7 +1087,7 @@ public class KillEffectManager {
     void executeRunicForge(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 95;
+            final int maxTicks = effectDuration("runic_forge", 95);
             final Color ember = Color.fromRGB(255, 120, 30);
             final Color gold = Color.fromRGB(255, 210, 70);
 
@@ -1136,7 +1140,7 @@ public class KillEffectManager {
     void executeCelestialBloom(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 120;
+            final int maxTicks = effectDuration("celestial_bloom", 120);
             final Color[] bloomColors = {
                     Color.fromRGB(255, 240, 255),
                     Color.fromRGB(190, 245, 255),
@@ -1191,7 +1195,7 @@ public class KillEffectManager {
     void executeAstralVerdict(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 120;
+            final int maxTicks = effectDuration("astral_verdict", 120);
             final List<Location> stars = Arrays.asList(
                     center.clone().add(-2.6, 5.4, -0.8),
                     center.clone().add(-1.2, 6.0, 1.6),
@@ -1268,7 +1272,7 @@ public class KillEffectManager {
     void executeTimeSnap(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 90;
+            final int maxTicks = effectDuration("time_snap", 90);
             final Color start = Color.fromRGB(170, 220, 255);
             final Color end = Color.fromRGB(255, 255, 255);
 
@@ -1328,7 +1332,7 @@ public class KillEffectManager {
     void executeVoidConsumption(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 90;
+            final int maxTicks = effectDuration("void_consumption", 90);
             
             @Override
             public void run() {
@@ -1367,7 +1371,7 @@ public class KillEffectManager {
     void executePhoenixRebirth(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 100;
+            final int maxTicks = effectDuration("phoenix_rebirth", 100);
             
             @Override
             public void run() {
@@ -1412,7 +1416,7 @@ public class KillEffectManager {
     void executeCelestialGateway(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 110;
+            final int maxTicks = effectDuration("celestial_gateway", 110);
             
             @Override
             public void run() {
@@ -1453,7 +1457,7 @@ public class KillEffectManager {
     void executeElectricOverload(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 80;
+            final int maxTicks = effectDuration("electric_overload", 80);
             
             @Override
             public void run() {
@@ -1490,7 +1494,7 @@ public class KillEffectManager {
     void executeCrystalGarden(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 140;
+            final int maxTicks = effectDuration("crystal_garden", 140);
             final List<CrystalSpire> crystals = new ArrayList<>();
             
             @Override
@@ -1524,10 +1528,11 @@ public class KillEffectManager {
     void executeSpectralHaunt(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
+            final int maxTicks = effectDuration("spectral_haunt", 100);
             @Override
             public void run() {
-                if (ticks >= 100) { cancel(); return; }
-                double opacity = 1.0 - ((double) ticks / 100);
+                if (ticks >= maxTicks) { cancel(); return; }
+                double opacity = 1.0 - ((double) ticks / maxTicks);
                 for (double y = 0; y <= 1.8; y += 0.3) {
                     for (int angle = 0; angle < 360; angle += 60) {
                         double rad = Math.toRadians(angle);
@@ -1544,10 +1549,11 @@ public class KillEffectManager {
     void executeLaserLightShow(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
+            final int maxTicks = effectDuration("laser_light_show", 120);
             final Color[] colors = {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.PURPLE};
             @Override
             public void run() {
-                if (ticks >= 120) { cancel(); return; }
+                if (ticks >= maxTicks) { cancel(); return; }
                 for (int laser = 0; laser < 6; laser++) {
                     double angle = (2 * Math.PI * laser / 6) + (ticks * 0.1);
                     Color color = colors[laser % colors.length];
@@ -1565,10 +1571,11 @@ public class KillEffectManager {
     void executeMeteorImpact(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
+            final int maxTicks = effectDuration("meteor_impact", 100);
             boolean impacted = false;
             @Override
             public void run() {
-                if (ticks >= 100) { cancel(); return; }
+                if (ticks >= maxTicks) { cancel(); return; }
                 if (!impacted && ticks < 30) {
                     Location meteorLoc = center.clone().add(0, 10 - (ticks * 0.4), 0);
                     spawnParticles(viewers, meteorLoc, Particle.FLAME, 10, 0.3, 0.3, 0.3, 0.1);
@@ -1587,7 +1594,7 @@ public class KillEffectManager {
     void executeBioluminescentBloom(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 90;
+            final int maxTicks = effectDuration("bioluminescent_bloom", 90);
             final List<Spore> spores = new ArrayList<>();
             
             @Override
@@ -1654,7 +1661,7 @@ public class KillEffectManager {
     void executeTimeFracture(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 80;
+            final int maxTicks = effectDuration("time_fracture", 80);
             final List<Fracture> fractures = new ArrayList<>();
             
             @Override
@@ -1709,10 +1716,11 @@ public class KillEffectManager {
     void executeDivineAscension(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
+            final int maxTicks = effectDuration("divine_ascension", 130);
             @Override
             public void run() {
-                if (ticks >= 130) { cancel(); return; }
-                double progress = (double) ticks / 130;
+                if (ticks >= maxTicks) { cancel(); return; }
+                double progress = (double) ticks / maxTicks;
                 for (int helix = 0; helix < 2; helix++) {
                     for (double h = 0; h <= progress * 6; h += 0.3) {
                         double angle = (h * 0.8) + (helix * Math.PI);
@@ -1730,7 +1738,7 @@ public class KillEffectManager {
     void executeToxicMeltdown(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 110;
+            final int maxTicks = effectDuration("toxic_meltdown", 110);
             final List<ToxicBubble> bubbles = new ArrayList<>();
             
             @Override
@@ -1807,9 +1815,10 @@ public class KillEffectManager {
     void executeQuantumCollapse(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
+            final int maxTicks = effectDuration("quantum_collapse", 90);
             @Override
             public void run() {
-                if (ticks >= 90) { cancel(); return; }
+                if (ticks >= maxTicks) { cancel(); return; }
                 for (int phase = 0; phase < 4; phase++) {
                     double visibility = (Math.sin((ticks + phase * 15) * 0.2) + 1) / 2;
                     for (double y = 0; y <= 1.8; y += 0.2) {
@@ -1829,10 +1838,11 @@ public class KillEffectManager {
     void executeSupernova(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
+            final int maxTicks = effectDuration("supernova", 60);
             boolean exploded = false;
             @Override
             public void run() {
-                if (ticks >= 60) { cancel(); return; }
+                if (ticks >= maxTicks) { cancel(); return; }
                 if (!exploded && ticks < 20) {
                     double intensity = (double) ticks / 20;
                     spawnParticles(viewers, center.clone().add(0, 1, 0), Particle.END_ROD, (int)(10 * intensity), 0.5, 0.5, 0.5, 0.1);

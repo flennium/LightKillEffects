@@ -1,5 +1,6 @@
 package org.flennn.lightkilleffects.preview;
 
+import org.bukkit.Location;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -9,6 +10,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.flennn.lightkilleffects.LightKillEffects;
 import org.flennn.lightkilleffects.util.Console;
@@ -210,14 +212,55 @@ public class PreviewListener implements Listener {
             return;
         }
 
-        double maxDistance = plugin.getConfig().getDouble("gui.preview.max-distance",
-                plugin.getConfig().getDouble("preview.max-distance", 10));
         if (!event.getTo().getWorld().equals(session.getPreviewLocation().getWorld())
-                || event.getTo().distanceSquared(session.getPreviewLocation()) > maxDistance * maxDistance) {
-            event.setTo(session.getPreviewLocation());
-            plugin.sendMessage(player, "preview-boundary-exceeded");
-            plugin.logDebug("Teleported " + player.getName() + " back to preview boundary");
+                || hasPositionChanged(event)) {
+            event.setTo(lockedPreviewLocation(session, event.getTo()));
+            plugin.logDebug("Locked preview movement for " + player.getName());
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onVehicleMove(VehicleMoveEvent event) {
+        if (!(event.getVehicle() instanceof Boat) || event.getTo() == null) {
+            return;
+        }
+
+        for (Entity passenger : event.getVehicle().getPassengers()) {
+            if (!(passenger instanceof Player)) {
+                continue;
+            }
+
+            Player player = (Player) passenger;
+            PreviewSession session = previewManager.getSession(player);
+            if (session == null || !session.isActive()) {
+                continue;
+            }
+
+            Location anchor = session.getPreviewLocation().clone().add(0, 0.5, 0);
+            anchor.setYaw(event.getTo().getYaw());
+            anchor.setPitch(event.getTo().getPitch());
+            if (!event.getTo().getWorld().equals(anchor.getWorld())
+                    || event.getTo().distanceSquared(anchor) > 0.0001D) {
+                event.getVehicle().teleport(anchor);
+                plugin.logDebug("Reset preview boat position for " + player.getName());
+            }
+        }
+    }
+
+    private boolean hasPositionChanged(PlayerMoveEvent event) {
+        if (event.getFrom() == null || event.getTo() == null) {
+            return false;
+        }
+        return event.getFrom().getX() != event.getTo().getX()
+                || event.getFrom().getY() != event.getTo().getY()
+                || event.getFrom().getZ() != event.getTo().getZ();
+    }
+
+    private org.bukkit.Location lockedPreviewLocation(PreviewSession session, org.bukkit.Location target) {
+        org.bukkit.Location locked = session.getPreviewLocation().clone();
+        locked.setYaw(target.getYaw());
+        locked.setPitch(target.getPitch());
+        return locked;
     }
 
     private boolean isSafeCommand(String command) {

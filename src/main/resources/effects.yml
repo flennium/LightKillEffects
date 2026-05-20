@@ -266,7 +266,7 @@ effects:
       - "&7around the victim before"
       - "&7detonating in raw voltage"
     icon: "LIGHTNING_ROD"
-    duration: 90
+    duration: 100
     intensity: 8
     radius: 5
     sound: "ENTITY_LIGHTNING_BOLT_IMPACT"
@@ -279,7 +279,7 @@ effects:
       - "&7in a slow spiral before"
       - "&7the finale pulls inward"
     icon: "SOUL_LANTERN"
-    duration: 110
+    duration: 120
     intensity: 5
     radius: 4
     sound: "ENTITY_GHAST_AMBIENT"
@@ -292,7 +292,7 @@ effects:
       - "&7form around the kill and"
       - "&7burst into sharp fragments"
     icon: "TINTED_GLASS"
-    duration: 80
+    duration: 90
     intensity: 6
     radius: 4
     sound: "BLOCK_GLASS_BREAK"
@@ -305,7 +305,7 @@ effects:
       - "&7regal sigils turn the kill"
       - "&7into a ceremonial finish"
     icon: "GOLDEN_HELMET"
-    duration: 100
+    duration: 110
     intensity: 6
     radius: 4
     sound: "ENTITY_PLAYER_LEVELUP"
@@ -318,7 +318,7 @@ effects:
       - "&7outward, then collapse into"
       - "&7a beautiful finishing vortex"
     icon: "PINK_PETALS"
-    duration: 100
+    duration: 110
     intensity: 6
     radius: 5
     sound: "BLOCK_GRASS_BREAK"
@@ -331,7 +331,7 @@ effects:
       - "&7through colors, smoke, and"
       - "&7a messy magical blowout"
     icon: "BREWING_STAND"
-    duration: 110
+    duration: 120
     intensity: 7
     radius: 5
     sound: "BLOCK_BREWING_STAND_BREW"
@@ -357,7 +357,7 @@ effects:
       - "&7opens in the air and ends"
       - "&7in a shower of stars"
     icon: "AMETHYST_SHARD"
-    duration: 120
+    duration: 130
     intensity: 6
     radius: 5
     sound: "BLOCK_AMETHYST_BLOCK_CHIME"
@@ -370,7 +370,7 @@ effects:
       - "&7while constellations align"
       - "&7for a final judgment beam"
     icon: "END_CRYSTAL"
-    duration: 120
+    duration: 130
     intensity: 8
     radius: 6
     sound: "ENTITY_LIGHTNING_BOLT_THUNDER"
@@ -383,7 +383,7 @@ effects:
       - "&7freeze for a beat before"
       - "&7reality snaps back hard"
     icon: "CLOCK"
-    duration: 90
+    duration: 100
     intensity: 6
     radius: 4
     sound: "ENTITY_ENDERMAN_TELEPORT"
