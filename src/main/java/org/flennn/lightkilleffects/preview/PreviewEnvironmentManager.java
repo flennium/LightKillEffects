@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Boat;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -84,12 +86,18 @@ public class PreviewEnvironmentManager {
             Location boatLoc = player.getLocation().clone();
             boatLoc.setY(boatLoc.getY() + 0.5);
 
-            Boat boat = player.getWorld().spawn(boatLoc, Boat.class);
+            Entity entity = player.getWorld().spawnEntity(boatLoc, boatEntityType());
+            if (!(entity instanceof Boat)) {
+                entity.remove();
+                return false;
+            }
+
+            Boat boat = (Boat) entity;
             boat.setInvulnerable(true);
             boat.setCustomNameVisible(false);
             boat.setInvisible(true);
             boat.setGravity(false);
-            boat.setPersistent(true);
+            boat.setPersistent(false);
             if (!boat.addPassenger(player)) {
                 boat.remove();
                 return false;
@@ -139,6 +147,14 @@ public class PreviewEnvironmentManager {
             activeSessions.remove(player.getUniqueId());
             session.end();
             Console.error("Error ending preview for " + player.getName() + ": " + e.getMessage());
+        }
+    }
+
+    private EntityType boatEntityType() {
+        try {
+            return EntityType.valueOf("OAK_BOAT");
+        } catch (IllegalArgumentException ignored) {
+            return EntityType.BOAT;
         }
     }
 

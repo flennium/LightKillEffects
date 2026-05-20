@@ -18,6 +18,8 @@ messages:
   favorite-added: "&aAdded &e{effect} &ato your favorites!"
   favorite-removed: "&aRemoved &e{effect} &afrom your favorites!"
   favorites-full: "&cYour favorites list is full! Remove one to add another."
+  viewing-effects-enabled: "&aYou will now see kill effects."
+  viewing-effects-disabled: "&cYou will no longer see kill effects."
   
   # Info messages
   current-effect: "&7Your current kill effect: &e{effect}"

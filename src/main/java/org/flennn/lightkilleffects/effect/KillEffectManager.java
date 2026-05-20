@@ -2,6 +2,7 @@ package org.flennn.lightkilleffects.effect;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -75,24 +76,27 @@ public class KillEffectManager {
         }
         setCooldown(killer);
         currentEffectParticleCount.set(0);
-        List<Player> nearbyPlayers = getNearbyPlayers(deathLocation);
-        if (nearbyPlayers.isEmpty()) return;
-        
-        plugin.logDebug("Executing " + effect.getDisplayName() + " at " + formatLocation(deathLocation) + 
-                       " (max particles: " + maxParticlesPerEffect + ")");
-        
-        KillEffect handler = this.effects.get(effect);
-        if (handler == null) return;
-        handler.run(deathLocation, nearbyPlayers);
-        if (soundsEnabled) {
-            playSound(deathLocation, effect.getSound());
+        try {
+            List<Player> nearbyPlayers = getNearbyPlayers(deathLocation);
+            if (nearbyPlayers.isEmpty()) return;
+
+            plugin.logDebug("Executing " + effect.getDisplayName() + " at " + formatLocation(deathLocation) +
+                    " (max particles: " + maxParticlesPerEffect + ")");
+
+            KillEffect handler = this.effects.get(effect);
+            if (handler == null) return;
+            handler.run(deathLocation, nearbyPlayers);
+            if (soundsEnabled) {
+                playSound(deathLocation, effect.getSound());
+            }
+            int finalParticleCount = currentEffectParticleCount.get();
+            if (plugin.isDebugMode()) {
+                plugin.logDebug("Effect " + effect.getDisplayName() + " completed - Total particles used: " +
+                        finalParticleCount + "/" + maxParticlesPerEffect);
+            }
+        } finally {
+            currentEffectParticleCount.remove();
         }
-        int finalParticleCount = currentEffectParticleCount.get();
-        if (plugin.isDebugMode()) {
-            plugin.logDebug("Effect " + effect.getDisplayName() + " completed - Total particles used: " + 
-                          finalParticleCount + "/" + maxParticlesPerEffect);
-        }
-        currentEffectParticleCount.remove();
     }
     void executeLightningStorm(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
@@ -390,11 +394,25 @@ public class KillEffectManager {
                 plugin.logDebug("Reducing particle count to " + count + " (remaining budget: " + remainingParticles + ")");
             }
         }
+        Object particleData = getParticleData(particle, data);
+        if (particleData == null && particle.getDataType() != Void.class) {
+            if (plugin.isDebugMode()) {
+                plugin.logDebug("Skipping " + particle.name() + " because it requires " + particle.getDataType().getSimpleName());
+            }
+            return;
+        }
+
         currentEffectParticleCount.set(currentCount + count);
         
         for (Player player : viewers) {
             if (player.getWorld().equals(location.getWorld()) && player.getLocation().distanceSquared(location) <= particleRenderDistance * particleRenderDistance) {
-                player.spawnParticle(particle, location, count, offsetX, offsetY, offsetZ, extra, data);
+                try {
+                    player.spawnParticle(particle, location, count, offsetX, offsetY, offsetZ, extra, particleData);
+                } catch (IllegalArgumentException e) {
+                    if (plugin.isDebugMode()) {
+                        plugin.logDebug("Could not spawn " + particle.name() + " for " + player.getName() + ": " + e.getMessage());
+                    }
+                }
             }
         }
         
@@ -403,6 +421,33 @@ public class KillEffectManager {
             plugin.logDebug("Particle usage: " + newCount + "/" + maxParticlesPerEffect + 
                           " (" + String.format("%.1f", (newCount * 100.0 / maxParticlesPerEffect)) + "%)");
         }
+    }
+
+    private Object getParticleData(Particle particle, Object data) {
+        if (data != null) {
+            return data;
+        }
+
+        Class<?> dataType = particle.getDataType();
+        if (dataType == Void.class) {
+            return null;
+        }
+        if (dataType == Color.class) {
+            return Color.WHITE;
+        }
+        if (dataType == Particle.DustOptions.class) {
+            return new Particle.DustOptions(Color.WHITE, 1.0f);
+        }
+        if (dataType == Particle.DustTransition.class) {
+            return new Particle.DustTransition(Color.WHITE, Color.YELLOW, 1.0f);
+        }
+        if (dataType == BlockData.class) {
+            return Material.STONE.createBlockData();
+        }
+        if (dataType == ItemStack.class) {
+            return new ItemStack(Material.STONE);
+        }
+        return null;
     }
     
     private List<Player> getNearbyPlayers(Location location) {
@@ -413,7 +458,10 @@ public class KillEffectManager {
         for (Entity entity : location.getWorld().getNearbyEntities(location, particleRenderDistance, 
                                                                    particleRenderDistance, particleRenderDistance)) {
             if (entity instanceof Player) {
-                players.add((Player) entity);
+                Player player = (Player) entity;
+                if (plugin.getPlayerData().getPlayerData(player).isViewingEffects()) {
+                    players.add(player);
+                }
             }
         }
         return players;

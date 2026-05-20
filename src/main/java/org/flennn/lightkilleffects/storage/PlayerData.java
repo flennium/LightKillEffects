@@ -63,6 +63,7 @@ public class PlayerData {
             }
             data.setLastUsed(playerSection.getLong("last-used", System.currentTimeMillis()));
             data.setTotalKills(playerSection.getInt("total-kills", 0));
+            data.setViewingEffects(playerSection.getBoolean("viewing-effects", true));
             
             ConfigurationSection effectStats = playerSection.getConfigurationSection("effect-stats");
             if (effectStats != null) {
@@ -110,6 +111,7 @@ public class PlayerData {
         storageHandler.getPlayerDataConfig().set(path + ".favorites", favorites);
         storageHandler.getPlayerDataConfig().set(path + ".last-used", data.getLastUsed());
         storageHandler.getPlayerDataConfig().set(path + ".total-kills", data.getTotalKills());
+        storageHandler.getPlayerDataConfig().set(path + ".viewing-effects", data.isViewingEffects());
         for (Map.Entry<EffectType, Integer> entry : data.getEffectStats().entrySet()) {
             storageHandler.getPlayerDataConfig().set(path + ".effect-stats." + entry.getKey().getConfigKey(), entry.getValue());
         }
@@ -191,6 +193,7 @@ public class PlayerData {
         private final Map<EffectType, Integer> effectStats;
         private long lastUsed;
         private int totalKills;
+        private boolean viewingEffects;
         
         public PlayerEffectData(UUID uuid) {
             this.uuid = uuid;
@@ -201,6 +204,7 @@ public class PlayerData {
             this.effectStats = new HashMap<>();
             this.lastUsed = System.currentTimeMillis();
             this.totalKills = 0;
+            this.viewingEffects = true;
         }
         public UUID getUuid() { return uuid; }
         public String getName() { return name; }
@@ -231,5 +235,12 @@ public class PlayerData {
         public int getTotalKills() { return totalKills; }
         public void setTotalKills(int totalKills) { this.totalKills = totalKills; }
         public void incrementTotalKills() { this.totalKills++; }
+
+        public boolean isViewingEffects() { return viewingEffects; }
+        public void setViewingEffects(boolean viewingEffects) { this.viewingEffects = viewingEffects; }
+        public boolean toggleViewingEffects() {
+            this.viewingEffects = !this.viewingEffects;
+            return this.viewingEffects;
+        }
     }
 }

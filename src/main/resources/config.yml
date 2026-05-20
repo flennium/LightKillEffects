@@ -112,7 +112,7 @@ performance:
   cleanup-interval: 200
   
   # Performance mode (reduces particles for better performance)
-  performance-mode: true
+  performance-mode: false
   
   # Clear player cache when they quit (saves memory)
   clear-cache-on-quit: true
@@ -186,6 +186,21 @@ gui:
           - ""
           - "&eRight-click effects in categories"
           - "&eto add them to favorites"
+    view-effects:
+      enabled:
+        material: "LIME_DYE"
+        name: "&aViewing Effects"
+        lore:
+          - "&7Kill effects are visible."
+          - ""
+          - "&eClick to hide effects"
+      disabled:
+        material: "GRAY_DYE"
+        name: "&cViewing Effects"
+        lore:
+          - "&7Kill effects are hidden."
+          - ""
+          - "&eClick to show effects"
     info:
       item:
         material: "BOOK"

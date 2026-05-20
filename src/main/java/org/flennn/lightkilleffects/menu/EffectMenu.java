@@ -34,6 +34,7 @@ public class EffectMenu implements Listener {
     private static final int CATEGORY_SLOT = 49;
     private static final int CURRENT_EFFECT_SLOT = 4;
     private static final int FAVORITES_SLOT = 0;
+    private static final int VIEW_EFFECTS_SLOT = 7;
     private static final int INFO_SLOT = 8;
     
     public EffectMenu(LightKillEffects plugin) {
@@ -112,6 +113,7 @@ public class EffectMenu implements Listener {
         inventory.setItem(CURRENT_EFFECT_SLOT, currentEffectItem);
         ItemStack favoritesItem = createFavoritesItem(playerData);
         inventory.setItem(FAVORITES_SLOT, favoritesItem);
+        inventory.setItem(VIEW_EFFECTS_SLOT, createViewEffectsItem(playerData));
         ItemStack infoItem = createInfoItem(playerData);
         inventory.setItem(INFO_SLOT, infoItem);
         org.bukkit.configuration.ConfigurationSection categoriesSection = plugin.getCategoriesConfig().getConfigurationSection("categories");
@@ -483,6 +485,23 @@ public class EffectMenu implements Listener {
         item.setItemMeta(meta);
         return item;
     }
+
+    private ItemStack createViewEffectsItem(PlayerData.PlayerEffectData playerData) {
+        boolean enabled = playerData.isViewingEffects();
+        String basePath = enabled ? "gui.menus.view-effects.enabled" : "gui.menus.view-effects.disabled";
+        Material fallbackMaterial = enabled ? Material.LIME_DYE : Material.GRAY_DYE;
+        String fallbackName = enabled ? "&aViewing Effects" : "&cViewing Effects";
+        List<String> fallbackLore = enabled
+                ? Arrays.asList("&7Kill effects are visible.", "", "&eClick to hide effects")
+                : Arrays.asList("&7Kill effects are hidden.", "", "&eClick to show effects");
+
+        ItemStack item = new ItemStack(material(basePath + ".material", fallbackMaterial));
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(text(basePath + ".name", fallbackName));
+        meta.setLore(textList(basePath + ".lore", fallbackLore));
+        item.setItemMeta(meta);
+        return item;
+    }
     
     private ItemStack createInfoItem(PlayerData.PlayerEffectData playerData) {
         ItemStack item = new ItemStack(material("gui.menus.info.item.material", Material.BOOK));
@@ -574,6 +593,14 @@ public class EffectMenu implements Listener {
         if (slot == FAVORITES_SLOT) {
             if (plugin.isDebugMode()) plugin.logDebug("Opening favorites menu");
             openFavoritesMenu(player);
+            return;
+        }
+
+        if (slot == VIEW_EFFECTS_SLOT) {
+            boolean enabled = playerData.toggleViewingEffects();
+            plugin.getPlayerData().savePlayerData(player.getUniqueId());
+            plugin.sendMessage(player, enabled ? "viewing-effects-enabled" : "viewing-effects-disabled");
+            player.openInventory(createMainMenu(player, session));
             return;
         }
         

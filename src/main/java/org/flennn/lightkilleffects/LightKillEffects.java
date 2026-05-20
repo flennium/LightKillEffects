@@ -56,7 +56,7 @@ public class LightKillEffects extends JavaPlugin {
         Console.success("LightKillEffects v" + getDescription().getVersion() + " enabled.");
         Console.info(EffectType.values().length + " kill effects loaded.");
 
-        if (getConfig().getBoolean("performance.performance-mode", true)) {
+        if (getConfig().getBoolean("performance.performance-mode", false)) {
             Console.warn("Performance mode is enabled.");
         }
     }
