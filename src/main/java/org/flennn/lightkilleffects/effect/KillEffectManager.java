@@ -12,26 +12,18 @@ import org.flennn.lightkilleffects.LightKillEffects;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
-/**
- * Manages all kill effect animations and particle systems
- * Handles the stunning visual effects with optimized performance
- */
 public class KillEffectManager {
     
     private final LightKillEffects plugin;
     private final Map<UUID, Long> cooldowns;
     private final Map<Location, Set<Block>> temporaryBlocks;
     private final Set<BukkitTask> activeTasks;
+    private final Map<EffectType, KillEffect> effects;
     private final Random random;
-    
-    // Performance settings
     private final int maxParticlesPerEffect;
     private final int particleRenderDistance;
     private final boolean performanceMode;
     private final boolean soundsEnabled;
-    
-    // Particle tracking - using ThreadLocal for thread safety
     private final ThreadLocal<Integer> currentEffectParticleCount = ThreadLocal.withInitial(() -> 0);
     
     public KillEffectManager(LightKillEffects plugin) {
@@ -39,130 +31,70 @@ public class KillEffectManager {
         this.cooldowns = new ConcurrentHashMap<>();
         this.temporaryBlocks = new ConcurrentHashMap<>();
         this.activeTasks = ConcurrentHashMap.newKeySet();
+        this.effects = new EnumMap<>(EffectType.class);
         this.random = new Random();
-        
-        // Load performance settings
         this.maxParticlesPerEffect = plugin.getSettings().maxParticlesPerEffect();
         this.particleRenderDistance = plugin.getSettings().particleRenderDistance();
         this.performanceMode = plugin.getConfig().getBoolean("performance.performance-mode", false);
         this.soundsEnabled = plugin.getConfig().getBoolean("general.sounds-enabled", true);
         
-        // Start cleanup task
+        registerEffects();
         startCleanupTask();
         
         plugin.logDebug("KillEffectManager initialized with performance mode: " + performanceMode);
     }
-    
-    /**
-     * Execute a kill effect at the specified location
-     */
+
+    private void registerEffects() {
+        this.effects.put(EffectType.LIGHTNING_STORM, new LightningStormEffect(this));
+        this.effects.put(EffectType.SOLAR_EXPLOSION, new SolarExplosionEffect(this));
+        this.effects.put(EffectType.FROZEN_BURST, new FrozenBurstEffect(this));
+        this.effects.put(EffectType.NEON_RAVE, new NeonRaveEffect(this));
+        this.effects.put(EffectType.STARFALL_CASCADE, new StarfallCascadeEffect(this));
+        this.effects.put(EffectType.PRISMATIC_SHATTER, new PrismaticShatterEffect(this));
+        this.effects.put(EffectType.VOID_CONSUMPTION, new VoidConsumptionEffect(this));
+        this.effects.put(EffectType.PHOENIX_REBIRTH, new PhoenixRebirthEffect(this));
+        this.effects.put(EffectType.CELESTIAL_GATEWAY, new CelestialGatewayEffect(this));
+        this.effects.put(EffectType.ELECTRIC_OVERLOAD, new ElectricOverloadEffect(this));
+        this.effects.put(EffectType.CRYSTAL_GARDEN, new CrystalGardenEffect(this));
+        this.effects.put(EffectType.SPECTRAL_HAUNT, new SpectralHauntEffect(this));
+        this.effects.put(EffectType.LASER_LIGHT_SHOW, new LaserLightShowEffect(this));
+        this.effects.put(EffectType.METEOR_IMPACT, new MeteorImpactEffect(this));
+        this.effects.put(EffectType.BIOLUMINESCENT_BLOOM, new BioluminescentBloomEffect(this));
+        this.effects.put(EffectType.TIME_FRACTURE, new TimeFractureEffect(this));
+        this.effects.put(EffectType.DIVINE_ASCENSION, new DivineAscensionEffect(this));
+        this.effects.put(EffectType.TOXIC_MELTDOWN, new ToxicMeltdownEffect(this));
+        this.effects.put(EffectType.QUANTUM_COLLAPSE, new QuantumCollapseEffect(this));
+        this.effects.put(EffectType.SUPERNOVA, new SupernovaEffect(this));
+    }
     public void executeEffect(Player killer, Location deathLocation, EffectType effect) {
         if (effect == null || deathLocation == null) return;
-        
-        // Check cooldown
         if (isOnCooldown(killer)) {
             long remaining = getRemainingCooldown(killer);
             killer.sendMessage(plugin.getMessage("on-cooldown", "seconds", String.valueOf(remaining)));
             return;
         }
-        
-        // Set cooldown
         setCooldown(killer);
-        
-        // Reset particle counter for this effect
         currentEffectParticleCount.set(0);
-        
-        // Get nearby players for particle rendering
         List<Player> nearbyPlayers = getNearbyPlayers(deathLocation);
         if (nearbyPlayers.isEmpty()) return;
         
         plugin.logDebug("Executing " + effect.getDisplayName() + " at " + formatLocation(deathLocation) + 
                        " (max particles: " + maxParticlesPerEffect + ")");
         
-        // Execute the specific effect
-        switch (effect) {
-            case LIGHTNING_STORM:
-                executeLightningStorm(deathLocation, nearbyPlayers);
-                break;
-            case SOLAR_EXPLOSION:
-                executeSolarExplosion(deathLocation, nearbyPlayers);
-                break;
-            case FROZEN_BURST:
-                executeFrozenBurst(deathLocation, nearbyPlayers);
-                break;
-            case NEON_RAVE:
-                executeNeonRave(deathLocation, nearbyPlayers);
-                break;
-            case STARFALL_CASCADE:
-                executeStarfallCascade(deathLocation, nearbyPlayers);
-                break;
-            case PRISMATIC_SHATTER:
-                executePrismaticShatter(deathLocation, nearbyPlayers);
-                break;
-            case VOID_CONSUMPTION:
-                executeVoidConsumption(deathLocation, nearbyPlayers);
-                break;
-            case PHOENIX_REBIRTH:
-                executePhoenixRebirth(deathLocation, nearbyPlayers);
-                break;
-            case CELESTIAL_GATEWAY:
-                executeCelestialGateway(deathLocation, nearbyPlayers);
-                break;
-            case ELECTRIC_OVERLOAD:
-                executeElectricOverload(deathLocation, nearbyPlayers);
-                break;
-            case CRYSTAL_GARDEN:
-                executeCrystalGarden(deathLocation, nearbyPlayers);
-                break;
-            case SPECTRAL_HAUNT:
-                executeSpectralHaunt(deathLocation, nearbyPlayers);
-                break;
-            case LASER_LIGHT_SHOW:
-                executeLaserLightShow(deathLocation, nearbyPlayers);
-                break;
-            case METEOR_IMPACT:
-                executeMeteorImpact(deathLocation, nearbyPlayers);
-                break;
-            case BIOLUMINESCENT_BLOOM:
-                executeBioluminescentBloom(deathLocation, nearbyPlayers);
-                break;
-            case TIME_FRACTURE:
-                executeTimeFracture(deathLocation, nearbyPlayers);
-                break;
-            case DIVINE_ASCENSION:
-                executeDivineAscension(deathLocation, nearbyPlayers);
-                break;
-            case TOXIC_MELTDOWN:
-                executeToxicMeltdown(deathLocation, nearbyPlayers);
-                break;
-            case QUANTUM_COLLAPSE:
-                executeQuantumCollapse(deathLocation, nearbyPlayers);
-                break;
-            case SUPERNOVA:
-                executeSupernova(deathLocation, nearbyPlayers);
-                break;
-        }
-        
-        // Play sound effect
+        KillEffect handler = this.effects.get(effect);
+        if (handler == null) return;
+        handler.run(deathLocation, nearbyPlayers);
         if (soundsEnabled) {
             playSound(deathLocation, effect.getSound());
         }
-        
-        // Log final particle usage and cleanup
         int finalParticleCount = currentEffectParticleCount.get();
         if (plugin.isDebugMode()) {
             plugin.logDebug("Effect " + effect.getDisplayName() + " completed - Total particles used: " + 
                           finalParticleCount + "/" + maxParticlesPerEffect);
         }
-        
-        // Clean up ThreadLocal to prevent memory leaks
         currentEffectParticleCount.remove();
     }
-    
-    /**
-     * Lightning Storm Effect - Multiple lightning bolts in circular patterns
-     */
-    private void executeLightningStorm(Location center, List<Player> viewers) {
+    void executeLightningStorm(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 60;
@@ -173,8 +105,6 @@ public class KillEffectManager {
                     cancel();
                     return;
                 }
-                
-                // Create lightning bolt pattern
                 if (ticks % 12 == 0) {
                     int bolts = performanceMode ? 3 : 5;
                     for (int i = 0; i < bolts; i++) {
@@ -186,12 +116,8 @@ public class KillEffectManager {
                                 0,
                                 Math.sin(angle) * radius
                         );
-                        
-                        // Spawn lightning effect
                         spawnParticles(viewers, boltLoc, Particle.ELECTRIC_SPARK, 20, 0.1, 2, 0.1, 0.1);
                         spawnParticles(viewers, boltLoc, Particle.FIREWORKS_SPARK, 10, 0.2, 3, 0.2, 0.0);
-                        
-                        // Occasional real lightning for dramatic effect
                         if (ticks % 24 == 0 && random.nextBoolean()) {
                             center.getWorld().strikeLightningEffect(boltLoc);
                         }
@@ -204,11 +130,7 @@ public class KillEffectManager {
         
         activeTasks.add(task);
     }
-    
-    /**
-     * Solar Explosion Effect - Golden sphere with radiating light rays
-     */
-    private void executeSolarExplosion(Location center, List<Player> viewers) {
+    void executeSolarExplosion(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 80;
@@ -222,14 +144,10 @@ public class KillEffectManager {
                 
                 double progress = (double) ticks / maxTicks;
                 double radius = 0.5 + (progress * 4);
-                
-                // Central golden sphere
                 spawnParticles(viewers, center, Particle.FLAME, 
                         (int) (30 * (1 - progress)), 0.5, 0.5, 0.5, 0.05);
                 spawnParticles(viewers, center, Particle.FIREWORKS_SPARK, 
                         (int) (20 * (1 - progress)), 0.3, 0.3, 0.3, 0.1);
-                
-                // Radiating light rays
                 for (int i = 0; i < (performanceMode ? 8 : 16); i++) {
                     double angle = (2 * Math.PI * i) / (performanceMode ? 8 : 16);
                     
@@ -253,11 +171,7 @@ public class KillEffectManager {
         
         activeTasks.add(task);
     }
-    
-    /**
-     * Frozen Burst Effect - Ice-blue spiraling particles with shattering ice
-     */
-    private void executeFrozenBurst(Location center, List<Player> viewers) {
+    void executeFrozenBurst(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 70;
@@ -265,7 +179,6 @@ public class KillEffectManager {
             @Override
             public void run() {
                 if (ticks >= maxTicks) {
-                    // Create ice shatter effect
                     for (int i = 0; i < (performanceMode ? 50 : 100); i++) {
                         Location shatterLoc = center.clone().add(
                                 (random.nextDouble() - 0.5) * 8,
@@ -280,8 +193,6 @@ public class KillEffectManager {
                 }
                 
                 double progress = (double) ticks / maxTicks;
-                
-                // Spiral ice particles
                 for (int i = 0; i < (performanceMode ? 2 : 4); i++) {
                     double angle = (ticks * 0.2) + (i * Math.PI / 2);
                     double radius = progress * 4;
@@ -292,14 +203,10 @@ public class KillEffectManager {
                             height,
                             Math.sin(angle) * radius
                     );
-                    
-                    // Create custom blue-tinted particles
                     spawnParticles(viewers, spiralLoc, Particle.REDSTONE, 5, 0.1, 0.1, 0.1, 0.0,
                             new Particle.DustOptions(Color.fromRGB(173, 216, 230), 1.5f));
                     spawnParticles(viewers, spiralLoc, Particle.SNOWFLAKE, 8, 0.2, 0.2, 0.2, 0.05);
                 }
-                
-                // Freezing ground effect
                 if (ticks % 5 == 0) {
                     for (int x = -2; x <= 2; x++) {
                         for (int z = -2; z <= 2; z++) {
@@ -317,11 +224,7 @@ public class KillEffectManager {
         
         activeTasks.add(task);
     }
-    
-    /**
-     * Neon Rave Effect - Rapidly cycling colored lights in disco fashion
-     */
-    private void executeNeonRave(Location center, List<Player> viewers) {
+    void executeNeonRave(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 100;
@@ -336,12 +239,8 @@ public class KillEffectManager {
                     cancel();
                     return;
                 }
-                
-                // Strobe effect
                 if (ticks % 3 == 0) {
                     Color currentColor = neonColors[ticks / 3 % neonColors.length];
-                    
-                    // Disco ball effect in center
                     for (int i = 0; i < (performanceMode ? 20 : 40); i++) {
                         double phi = Math.acos(1 - 2 * random.nextDouble());
                         double theta = 2 * Math.PI * random.nextDouble();
@@ -354,8 +253,6 @@ public class KillEffectManager {
                         spawnParticles(viewers, ballLoc, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0,
                                 new Particle.DustOptions(currentColor, 1.0f));
                     }
-                    
-                    // Ground light beams
                     for (int beam = 0; beam < (performanceMode ? 4 : 8); beam++) {
                         double angle = (2 * Math.PI * beam) / (performanceMode ? 4 : 8) + (ticks * 0.1);
                         
@@ -379,11 +276,7 @@ public class KillEffectManager {
         
         activeTasks.add(task);
     }
-    
-    /**
-     * Starfall Cascade Effect - Glowing particles falling like shooting stars
-     */
-    private void executeStarfallCascade(Location center, List<Player> viewers) {
+    void executeStarfallCascade(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 120;
@@ -395,8 +288,6 @@ public class KillEffectManager {
                     cancel();
                     return;
                 }
-                
-                // Create new stars
                 if (ticks % 8 == 0 && stars.size() < (performanceMode ? 15 : 30)) {
                     stars.add(new Star(
                             center.clone().add(
@@ -411,24 +302,18 @@ public class KillEffectManager {
                             )
                     ));
                 }
-                
-                // Update and render stars
                 Iterator<Star> iterator = stars.iterator();
                 while (iterator.hasNext()) {
                     Star star = iterator.next();
                     star.update();
                     
                     if (star.location.getY() < center.getY() - 2) {
-                        // Star impact effect
                         spawnParticles(viewers, star.location, Particle.FIREWORKS_SPARK, 15, 0.3, 0.1, 0.3, 0.1);
                         spawnParticles(viewers, star.location, Particle.END_ROD, 8, 0.2, 0.2, 0.2, 0.05);
                         iterator.remove();
                     } else {
-                        // Render star trail
                         spawnParticles(viewers, star.location, Particle.END_ROD, 3, 0.1, 0.1, 0.1, 0.02);
                         spawnParticles(viewers, star.location, Particle.FIREWORKS_SPARK, 2, 0.05, 0.05, 0.05, 0.01);
-                        
-                        // Trail effect
                         Location trailLoc = star.location.clone().subtract(star.velocity.clone().multiply(3));
                         spawnParticles(viewers, trailLoc, Particle.END_ROD, 1, 0.05, 0.05, 0.05, 0.0);
                     }
@@ -440,14 +325,7 @@ public class KillEffectManager {
         
         activeTasks.add(task);
     }
-    
-    // Continue with more effect implementations...
-    // Due to length constraints, I'll implement the remaining effects in the next part
-    
-    /**
-     * Prismatic Shatter Effect - Rainbow glass particles with beacon
-     */
-    private void executePrismaticShatter(Location center, List<Player> viewers) {
+    void executePrismaticShatter(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 60;
@@ -460,8 +338,6 @@ public class KillEffectManager {
                 }
                 
                 double progress = (double) ticks / maxTicks;
-                
-                // Rainbow shards expanding outward
                 for (int i = 0; i < (performanceMode ? 50 : 100); i++) {
                     double angle = random.nextDouble() * 2 * Math.PI;
                     double radius = progress * 5;
@@ -472,8 +348,6 @@ public class KillEffectManager {
                             height,
                             Math.sin(angle) * radius
                     );
-                    
-                    // Rainbow colors
                     Color[] rainbowColors = {Color.RED, Color.ORANGE, Color.YELLOW, Color.LIME, Color.GREEN, Color.AQUA, Color.BLUE, Color.PURPLE};
                     Color rainbowColor = rainbowColors[(ticks + i * 10) % rainbowColors.length];
                     
@@ -481,8 +355,6 @@ public class KillEffectManager {
                             new Particle.DustOptions(rainbowColor, 1.0f));
                     spawnParticles(viewers, shardLoc, Particle.FIREWORKS_SPARK, 2, 0.1, 0.1, 0.1, 0.05);
                 }
-                
-                // Central beacon effect
                 if (ticks < 40) {
                     spawnParticles(viewers, center.clone().add(0, 1, 0), Particle.END_ROD, 10, 0.2, 1, 0.2, 0.1);
                 }
@@ -494,8 +366,6 @@ public class KillEffectManager {
         activeTasks.add(task);
     }
     
-    // Helper methods
-    
     private void spawnParticles(List<Player> viewers, Location location, Particle particle, int count, 
                                double offsetX, double offsetY, double offsetZ, double extra) {
         spawnParticles(viewers, location, particle, count, offsetX, offsetY, offsetZ, extra, null);
@@ -506,8 +376,6 @@ public class KillEffectManager {
         if (location == null || location.getWorld() == null || count <= 0) {
             return;
         }
-
-        // Check if we've exceeded the total particle limit for this effect
         int currentCount = currentEffectParticleCount.get();
         if (currentCount >= maxParticlesPerEffect) {
             if (plugin.isDebugMode()) {
@@ -515,8 +383,6 @@ public class KillEffectManager {
             }
             return;
         }
-        
-        // Limit count to remaining particle budget
         int remainingParticles = maxParticlesPerEffect - currentCount;
         if (count > remainingParticles) {
             count = remainingParticles;
@@ -524,8 +390,6 @@ public class KillEffectManager {
                 plugin.logDebug("Reducing particle count to " + count + " (remaining budget: " + remainingParticles + ")");
             }
         }
-        
-        // Update particle counter
         currentEffectParticleCount.set(currentCount + count);
         
         for (Player player : viewers) {
@@ -587,16 +451,12 @@ public class KillEffectManager {
         BukkitTask cleanupTask = new BukkitRunnable() {
             @Override
             public void run() {
-                // Clean expired cooldowns
                 long now = System.currentTimeMillis();
                 cooldowns.entrySet().removeIf(entry -> 
                     now - entry.getValue() > plugin.getConfig().getInt("general.global-cooldown", 3) * 1000L);
-                
-                // Clean temporary blocks
                 Iterator<Map.Entry<Location, Set<Block>>> iterator = temporaryBlocks.entrySet().iterator();
                 while (iterator.hasNext()) {
                     Map.Entry<Location, Set<Block>> entry = iterator.next();
-                    // This would be implemented with actual temporary block management
                     iterator.remove();
                 }
             }
@@ -605,15 +465,12 @@ public class KillEffectManager {
     }
     
     public void cleanup() {
-        // Cancel all active tasks
         for (BukkitTask task : activeTasks) {
             if (!task.isCancelled()) {
                 task.cancel();
             }
         }
         activeTasks.clear();
-        
-        // Clear temporary blocks
         clearAllTemporaryBlocks();
         
         plugin.logDebug("KillEffectManager cleaned up");
@@ -622,8 +479,6 @@ public class KillEffectManager {
     public void clearAllTemporaryBlocks() {
         for (Set<Block> blocks : temporaryBlocks.values()) {
             for (Block block : blocks) {
-                // Reset blocks to original state
-                // Implementation would depend on how temporary blocks are stored
             }
         }
         temporaryBlocks.clear();
@@ -632,8 +487,6 @@ public class KillEffectManager {
     private String formatLocation(Location loc) {
         return String.format("%.1f, %.1f, %.1f", loc.getX(), loc.getY(), loc.getZ());
     }
-    
-    // Inner classes for effect data
     private static class Star {
         Location location;
         Vector velocity;
@@ -693,7 +546,7 @@ public class KillEffectManager {
         void update() {
             age++;
             location.add(velocity);
-            velocity.multiply(0.98); // Gradual slowdown
+            velocity.multiply(0.98);
         }
     }
     
@@ -740,14 +593,10 @@ public class KillEffectManager {
         
         void update() {
             age++;
-            location.add(0, 0.02, 0); // Slow rise
+            location.add(0, 0.02, 0);
         }
     }
-    
-    /**
-     * Void Consumption Effect - Dark purple spiral black hole effect
-     */
-    private void executeVoidConsumption(Location center, List<Player> viewers) {
+    void executeVoidConsumption(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 90;
@@ -760,11 +609,9 @@ public class KillEffectManager {
                 }
                 
                 double progress = (double) ticks / maxTicks;
-                
-                // Inward spiraling void effect
                 for (int spiral = 0; spiral < (performanceMode ? 2 : 4); spiral++) {
                     double angle = (ticks * 0.3) + (spiral * Math.PI / 2);
-                    double radius = 6 - (progress * 5); // Spiral inward
+                    double radius = 6 - (progress * 5);
                     double height = Math.sin(ticks * 0.2) * 1.5;
                     
                     Location spiralLoc = center.clone().add(
@@ -772,13 +619,9 @@ public class KillEffectManager {
                             height,
                             Math.sin(angle) * radius
                     );
-                    
-                    // Dark purple void particles
                     spawnParticles(viewers, spiralLoc, Particle.PORTAL, 8, 0.2, 0.2, 0.2, 0.1);
                     spawnParticles(viewers, spiralLoc, Particle.SPELL_WITCH, 3, 0.1, 0.1, 0.1, 0.05);
                 }
-                
-                // Central void core
                 if (progress > 0.3) {
                     spawnParticles(viewers, center.clone().add(0, 1, 0), Particle.SMOKE_LARGE, 
                             (int) (15 * progress), 0.3, 0.5, 0.3, 0.02);
@@ -792,11 +635,7 @@ public class KillEffectManager {
         
         activeTasks.add(task);
     }
-    
-    /**
-     * Phoenix Rebirth Effect - Flame particles in wing patterns
-     */
-    private void executePhoenixRebirth(Location center, List<Player> viewers) {
+    void executePhoenixRebirth(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 100;
@@ -809,12 +648,8 @@ public class KillEffectManager {
                 }
                 
                 double progress = (double) ticks / maxTicks;
-                
-                // Phoenix wing pattern
                 for (int wing = 0; wing < 2; wing++) {
                     double wingDirection = wing == 0 ? 1 : -1;
-                    
-                    // Wing shape calculations
                     for (int point = 0; point < (performanceMode ? 8 : 15); point++) {
                         double wingProgress = (double) point / (performanceMode ? 8 : 15);
                         double wingSpan = 3 * wingProgress;
@@ -826,19 +661,13 @@ public class KillEffectManager {
                                 wingHeight + wingFlap,
                                 wingProgress * 1.5 - 0.75
                         );
-                        
-                        // Fire particles for wings
                         spawnParticles(viewers, wingLoc, Particle.FLAME, 3, 0.1, 0.1, 0.1, 0.02);
                         spawnParticles(viewers, wingLoc, Particle.LAVA, 1, 0.05, 0.05, 0.05, 0.0);
-                        
-                        // Wing tips glow
                         if (wingProgress > 0.7) {
                             spawnParticles(viewers, wingLoc, Particle.FIREWORKS_SPARK, 2, 0.1, 0.1, 0.1, 0.05);
                         }
                     }
                 }
-                
-                // Rising phoenix body
                 if (progress > 0.4) {
                     Location bodyLoc = center.clone().add(0, progress * 4, 0);
                     spawnParticles(viewers, bodyLoc, Particle.FLAME, 10, 0.3, 0.3, 0.3, 0.05);
@@ -851,11 +680,7 @@ public class KillEffectManager {
         
         activeTasks.add(task);
     }
-    
-    /**
-     * Celestial Gateway Effect - Rotating light portal
-     */
-    private void executeCelestialGateway(Location center, List<Player> viewers) {
+    void executeCelestialGateway(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 110;
@@ -869,8 +694,6 @@ public class KillEffectManager {
                 
                 double progress = (double) ticks / maxTicks;
                 double portalSize = 2.5;
-                
-                // Rotating portal rings
                 for (int ring = 0; ring < 3; ring++) {
                     double ringRadius = portalSize - (ring * 0.5);
                     double ringHeight = ring * 0.3;
@@ -884,14 +707,10 @@ public class KillEffectManager {
                                 ringHeight + 2,
                                 Math.sin(angle) * ringRadius
                         );
-                        
-                        // Portal particles
                         spawnParticles(viewers, ringLoc, Particle.PORTAL, 2, 0.05, 0.05, 0.05, 0.02);
                         spawnParticles(viewers, ringLoc, Particle.END_ROD, 1, 0.0, 0.0, 0.0, 0.0);
                     }
                 }
-                
-                // Portal center energy
                 Location centerPortal = center.clone().add(0, 2, 0);
                 spawnParticles(viewers, centerPortal, Particle.PORTAL, 15, 0.5, 0.1, 0.5, 0.1);
                 spawnParticles(viewers, centerPortal, Particle.ENCHANTMENT_TABLE, 8, 0.3, 0.3, 0.3, 0.05);
@@ -902,10 +721,7 @@ public class KillEffectManager {
         
         activeTasks.add(task);
     }
-    /**
-     * Electric Overload Effect - Blue electrical jumping particles
-     */
-    private void executeElectricOverload(Location center, List<Player> viewers) {
+    void executeElectricOverload(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 80;
@@ -916,8 +732,6 @@ public class KillEffectManager {
                     cancel();
                     return;
                 }
-                
-                // Electric sparks jumping around
                 for (int spark = 0; spark < (performanceMode ? 8 : 16); spark++) {
                     double angle = random.nextDouble() * 2 * Math.PI;
                     double radius = 1 + random.nextDouble() * 4;
@@ -934,8 +748,6 @@ public class KillEffectManager {
                         spawnParticles(viewers, sparkLoc, Particle.FIREWORKS_SPARK, 1, 0.02, 0.02, 0.02, 0.02);
                     }
                 }
-                
-                // Central overload
                 if (ticks % 5 == 0) {
                     spawnParticles(viewers, center.clone().add(0, 1, 0), Particle.ELECTRIC_SPARK, 20, 1, 1, 1, 0.2);
                 }
@@ -946,7 +758,7 @@ public class KillEffectManager {
         
         activeTasks.add(task);
     }
-    private void executeCrystalGarden(Location center, List<Player> viewers) {
+    void executeCrystalGarden(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 140;
@@ -958,8 +770,6 @@ public class KillEffectManager {
                     cancel();
                     return;
                 }
-                
-                // Spawn new crystals periodically
                 if (ticks % 20 == 0 && crystals.size() < (performanceMode ? 8 : 15)) {
                     crystals.add(new CrystalSpire(
                             center.clone().add(
@@ -970,8 +780,6 @@ public class KillEffectManager {
                             1 + random.nextDouble() * 3
                     ));
                 }
-                
-                // Update and render crystals
                 for (CrystalSpire crystal : crystals) {
                     crystal.update();
                     crystal.render(viewers);
@@ -984,7 +792,7 @@ public class KillEffectManager {
         activeTasks.add(task);
     }
     
-    private void executeSpectralHaunt(Location center, List<Player> viewers) {
+    void executeSpectralHaunt(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             @Override
@@ -1004,7 +812,7 @@ public class KillEffectManager {
         activeTasks.add(task);
     }
     
-    private void executeLaserLightShow(Location center, List<Player> viewers) {
+    void executeLaserLightShow(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final Color[] colors = {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.PURPLE};
@@ -1025,7 +833,7 @@ public class KillEffectManager {
         activeTasks.add(task);
     }
     
-    private void executeMeteorImpact(Location center, List<Player> viewers) {
+    void executeMeteorImpact(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             boolean impacted = false;
@@ -1047,7 +855,7 @@ public class KillEffectManager {
         activeTasks.add(task);
     }
     
-    private void executeBioluminescentBloom(Location center, List<Player> viewers) {
+    void executeBioluminescentBloom(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 90;
@@ -1059,8 +867,6 @@ public class KillEffectManager {
                     cancel();
                     return;
                 }
-                
-                // Generate new spores
                 if (ticks % 8 == 0 && spores.size() < (performanceMode ? 20 : 40)) {
                     spores.add(new Spore(
                             center.clone().add(0, 0.5, 0),
@@ -1071,15 +877,12 @@ public class KillEffectManager {
                             )
                     ));
                 }
-                
-                // Update and render spores
                 Iterator<Spore> iterator = spores.iterator();
                 while (iterator.hasNext()) {
                     Spore spore = iterator.next();
                     spore.update();
                     
                     if (spore.age > 60 || spore.location.getY() < center.getY() - 1) {
-                        // Spore lands and blooms
                         for (int bloom = 0; bloom < 5; bloom++) {
                             Location bloomLoc = spore.location.clone().add(
                                     (random.nextDouble() - 0.5) * 0.3,
@@ -1090,15 +893,12 @@ public class KillEffectManager {
                         }
                         iterator.remove();
                     } else {
-                        // Render floating spore
                         spawnParticles(viewers, spore.location, Particle.SPORE_BLOSSOM_AIR, 2, 0.05, 0.05, 0.05, 0.01);
                         if (spore.age % 10 == 0) {
                             spawnParticles(viewers, spore.location, Particle.VILLAGER_HAPPY, 1, 0.02, 0.02, 0.02, 0.01);
                         }
                     }
                 }
-                
-                // Ground bloom effect
                 if (ticks % 15 == 0) {
                     for (int ground = 0; ground < (performanceMode ? 8 : 16); ground++) {
                         double angle = random.nextDouble() * 2 * Math.PI;
@@ -1122,7 +922,7 @@ public class KillEffectManager {
         activeTasks.add(task);
     }
     
-    private void executeTimeFracture(Location center, List<Player> viewers) {
+    void executeTimeFracture(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 80;
@@ -1134,8 +934,6 @@ public class KillEffectManager {
                     cancel();
                     return;
                 }
-                
-                // Create reality fractures
                 if (ticks % 10 == 0 && fractures.size() < (performanceMode ? 6 : 12)) {
                     fractures.add(new Fracture(
                             center.clone().add(
@@ -1146,21 +944,15 @@ public class KillEffectManager {
                             random.nextDouble() * 2 * Math.PI
                     ));
                 }
-                
-                // Render fractures
                 for (Fracture fracture : fractures) {
                     fracture.update();
                     fracture.render(viewers);
                 }
-                
-                // Central time distortion
                 if (ticks % 5 == 0) {
                     Location timeCenter = center.clone().add(0, 2, 0);
                     spawnParticles(viewers, timeCenter, Particle.ENCHANTMENT_TABLE, 15, 1, 1, 1, 0.1);
                     spawnParticles(viewers, timeCenter, Particle.PORTAL, 8, 0.5, 0.5, 0.5, 0.05);
                 }
-                
-                // Reality ripples
                 if (ticks % 8 == 0) {
                     for (int ripple = 1; ripple <= 3; ripple++) {
                         double rippleRadius = ripple * 2;
@@ -1185,7 +977,7 @@ public class KillEffectManager {
         activeTasks.add(task);
     }
     
-    private void executeDivineAscension(Location center, List<Player> viewers) {
+    void executeDivineAscension(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             @Override
@@ -1206,7 +998,7 @@ public class KillEffectManager {
         activeTasks.add(task);
     }
     
-    private void executeToxicMeltdown(Location center, List<Player> viewers) {
+    void executeToxicMeltdown(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = 110;
@@ -1220,8 +1012,6 @@ public class KillEffectManager {
                 }
                 
                 double progress = (double) ticks / maxTicks;
-                
-                // Generate toxic bubbles
                 if (ticks % 6 == 0 && bubbles.size() < (performanceMode ? 15 : 30)) {
                     bubbles.add(new ToxicBubble(
                             center.clone().add(
@@ -1231,15 +1021,12 @@ public class KillEffectManager {
                             )
                     ));
                 }
-                
-                // Update bubbles
                 Iterator<ToxicBubble> iterator = bubbles.iterator();
                 while (iterator.hasNext()) {
                     ToxicBubble bubble = iterator.next();
                     bubble.update();
                     
                     if (bubble.age > 50) {
-                        // Bubble pops
                         for (int pop = 0; pop < 8; pop++) {
                             Location popLoc = bubble.location.clone().add(
                                     (random.nextDouble() - 0.5) * 0.5,
@@ -1250,7 +1037,6 @@ public class KillEffectManager {
                         }
                         iterator.remove();
                     } else {
-                        // Render bubble
                         spawnParticles(viewers, bubble.location, Particle.SLIME, 3, 0.1, 0.1, 0.1, 0.01);
                         if (bubble.age % 15 == 0) {
                             spawnParticles(viewers, bubble.location, Particle.ITEM_CRACK, 1, 0.05, 0.05, 0.05, 0.01,
@@ -1258,8 +1044,6 @@ public class KillEffectManager {
                         }
                     }
                 }
-                
-                // Toxic ground spread
                 double spreadRadius = progress * 5;
                 if (ticks % 8 == 0) {
                     for (int spread = 0; spread < (performanceMode ? 12 : 24); spread++) {
@@ -1278,8 +1062,6 @@ public class KillEffectManager {
                         }
                     }
                 }
-                
-                // Central toxic fountain
                 if (ticks % 4 == 0) {
                     Location fountain = center.clone().add(0, 0.5, 0);
                     spawnParticles(viewers, fountain, Particle.SLIME, 8, 0.3, 0.5, 0.3, 0.05);
@@ -1293,7 +1075,7 @@ public class KillEffectManager {
         activeTasks.add(task);
     }
     
-    private void executeQuantumCollapse(Location center, List<Player> viewers) {
+    void executeQuantumCollapse(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             @Override
@@ -1315,7 +1097,7 @@ public class KillEffectManager {
         activeTasks.add(task);
     }
     
-    private void executeSupernova(Location center, List<Player> viewers) {
+    void executeSupernova(Location center, List<Player> viewers) {
         BukkitTask task = new BukkitRunnable() {
             int ticks = 0;
             boolean exploded = false;

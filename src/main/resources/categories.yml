@@ -1,0 +1,57 @@
+categories:
+  fire:
+    name: "&c&lFire Effects"
+    icon: "BLAZE_POWDER"
+    effects:
+      - "solar_explosion"
+      - "phoenix_rebirth"
+      - "meteor_impact"
+  
+  ice:
+    name: "&b&lIce Effects"
+    icon: "ICE"
+    effects:
+      - "frozen_burst"
+  
+  electric:
+    name: "&e&lElectric Effects"
+    icon: "LIGHTNING_ROD"
+    effects:
+      - "lightning_storm"
+      - "electric_overload"
+  
+  mystical:
+    name: "&5&lMystical Effects"
+    icon: "ENCHANTED_BOOK"
+    effects:
+      - "void_consumption"
+      - "celestial_gateway"
+      - "spectral_haunt"
+      - "time_fracture"
+      - "divine_ascension"
+      - "quantum_collapse"
+  
+  nature:
+    name: "&a&lNature Effects"
+    icon: "OAK_SAPLING"
+    effects:
+      - "crystal_garden"
+      - "bioluminescent_bloom"
+      - "toxic_meltdown"
+  
+  cosmic:
+    name: "&f&lCosmic Effects"
+    icon: "NETHER_STAR"
+    effects:
+      - "starfall_cascade"
+      - "supernova"
+  
+  party:
+    name: "&d&lParty Effects"
+    icon: "JUKEBOX"
+    effects:
+      - "neon_rave"
+      - "prismatic_shatter"
+      - "laser_light_show"
+
+# Individual Effect Configurations

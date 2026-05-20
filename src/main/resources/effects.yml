@@ -1,0 +1,261 @@
+effects:
+  lightning_storm:
+    name: "&e&lLightning Storm"
+    description:
+      - "&7Multiple lightning bolts strike"
+      - "&7in circular patterns around"
+      - "&7the victim's location"
+    icon: "LIGHTNING_ROD"
+    duration: 60  # ticks
+    intensity: 5  # number of lightning bolts
+    radius: 4     # effect radius
+    sound: "ENTITY_LIGHTNING_BOLT_THUNDER"
+    permission-required: true
+
+  solar_explosion:
+    name: "&6&lSolar Explosion"
+    description:
+      - "&7A golden sphere explodes"
+      - "&7with radiating light rays"
+      - "&7creating a miniature sun"
+    icon: "SUN_CORAL"
+    duration: 80
+    intensity: 8
+    radius: 5
+    sound: "ENTITY_GENERIC_EXPLODE"
+    permission-required: true
+
+  frozen_burst:
+    name: "&b&lFrozen Burst"
+    description:
+      - "&7Ice-blue spiraling particles"
+      - "&7with shattering ice blocks"
+      - "&7freeze the area solid"
+    icon: "PACKED_ICE"
+    duration: 70
+    intensity: 6
+    radius: 4
+    sound: "BLOCK_GLASS_BREAK"
+    permission-required: true
+
+  neon_rave:
+    name: "&d&lNeon Rave"
+    description:
+      - "&7Rapidly cycling colored lights"
+      - "&7create a disco party"
+      - "&7around the death location"
+    icon: "REDSTONE_LAMP"
+    duration: 100
+    intensity: 10
+    radius: 6
+    sound: "BLOCK_NOTE_BLOCK_BASS"
+    permission-required: true
+
+  starfall_cascade:
+    name: "&f&lStarfall Cascade"
+    description:
+      - "&7Glowing particles fall"
+      - "&7like shooting stars from"
+      - "&7the heavens above"
+    icon: "NETHER_STAR"
+    duration: 120
+    intensity: 7
+    radius: 8
+    sound: "ENTITY_EXPERIENCE_ORB_PICKUP"
+    permission-required: true
+
+  prismatic_shatter:
+    name: "&c&lP&6r&ei&as&bm&9a&dt&5i&cc &6S&eh&aa&bt&9t&de&5r"
+    description:
+      - "&7Rainbow glass particles"
+      - "&7scatter with a beacon"
+      - "&7creating prismatic beauty"
+    icon: "GLASS"
+    duration: 60
+    intensity: 4
+    radius: 3
+    sound: "BLOCK_GLASS_BREAK"
+    permission-required: false
+
+  void_consumption:
+    name: "&5&lVoid Consumption"
+    description:
+      - "&7A dark purple spiral"
+      - "&7creates a black hole effect"
+      - "&7consuming all light"
+    icon: "OBSIDIAN"
+    duration: 90
+    intensity: 6
+    radius: 5
+    sound: "ENTITY_WITHER_SPAWN"
+    permission-required: true
+
+  phoenix_rebirth:
+    name: "&c&lPhoenix Rebirth"
+    description:
+      - "&7Flame particles form"
+      - "&7majestic wing patterns"
+      - "&7rising from the ashes"
+    icon: "BLAZE_POWDER"
+    duration: 100
+    intensity: 8
+    radius: 6
+    sound: "ENTITY_BLAZE_SHOOT"
+    permission-required: true
+
+  celestial_gateway:
+    name: "&5&lCelestial Gateway"
+    description:
+      - "&7A rotating light portal"
+      - "&7opens to the cosmos"
+      - "&7with swirling energy"
+    icon: "END_PORTAL_FRAME"
+    duration: 110
+    intensity: 7
+    radius: 4
+    sound: "BLOCK_END_PORTAL_SPAWN"
+    permission-required: true
+
+  electric_overload:
+    name: "&e&lElectric Overload"
+    description:
+      - "&7Blue electrical particles"
+      - "&7jump chaotically between"
+      - "&7points of energy"
+    icon: "REDSTONE"
+    duration: 80
+    intensity: 9
+    radius: 5
+    sound: "ENTITY_LIGHTNING_BOLT_IMPACT"
+    permission-required: true
+
+  crystal_garden:
+    name: "&a&lCrystal Garden"
+    description:
+      - "&7Glowing crystal blocks"
+      - "&7sprout from the ground"
+      - "&7creating a magical garden"
+    icon: "EMERALD_BLOCK"
+    duration: 140
+    intensity: 5
+    radius: 6
+    sound: "BLOCK_AMETHYST_BLOCK_CHIME"
+    permission-required: true
+
+  spectral_haunt:
+    name: "&7&lSpectral Haunt"
+    description:
+      - "&7A ghostly silhouette"
+      - "&7of the victim appears"
+      - "&7before fading away"
+    icon: "SKELETON_SKULL"
+    duration: 100
+    intensity: 4
+    radius: 3
+    sound: "ENTITY_GHAST_AMBIENT"
+    permission-required: true
+
+  laser_light_show:
+    name: "&c&lLaser Light Show"
+    description:
+      - "&7Intersecting colored"
+      - "&7laser beams create"
+      - "&7a spectacular light show"
+    icon: "BEACON"
+    duration: 120
+    intensity: 8
+    radius: 7
+    sound: "BLOCK_BEACON_ACTIVATE"
+    permission-required: true
+
+  meteor_impact:
+    name: "&c&lMeteor Impact"
+    description:
+      - "&7A fiery meteor crashes"
+      - "&7creating a burning crater"
+      - "&7at the impact site"
+    icon: "MAGMA_BLOCK"
+    duration: 100
+    intensity: 6
+    radius: 5
+    sound: "ENTITY_GENERIC_EXPLODE"
+    permission-required: true
+
+  bioluminescent_bloom:
+    name: "&a&lBioluminescent Bloom"
+    description:
+      - "&7Gentle spore-like particles"
+      - "&7spread a soft glowing"
+      - "&7bioluminescent effect"
+    icon: "GLOWSTONE_DUST"
+    duration: 90
+    intensity: 4
+    radius: 4
+    sound: "BLOCK_GRASS_BREAK"
+    permission-required: false
+
+  time_fracture:
+    name: "&8&lTime Fracture"
+    description:
+      - "&7Reality cracks and fractures"
+      - "&7around the death location"
+      - "&7bending time itself"
+    icon: "CLOCK"
+    duration: 80
+    intensity: 6
+    radius: 4
+    sound: "ENTITY_ENDERMAN_TELEPORT"
+    permission-required: true
+
+  divine_ascension:
+    name: "&6&lDivine Ascension"
+    description:
+      - "&7A golden double helix"
+      - "&7spiral carries the soul"
+      - "&7to divine heights"
+    icon: "GOLDEN_APPLE"
+    duration: 130
+    intensity: 7
+    radius: 5
+    sound: "ENTITY_PLAYER_LEVELUP"
+    permission-required: true
+
+  toxic_meltdown:
+    name: "&2&lToxic Meltdown"
+    description:
+      - "&7Bubbling green particles"
+      - "&7spread corrosively"
+      - "&7melting everything nearby"
+    icon: "SLIME_BALL"
+    duration: 110
+    intensity: 6
+    radius: 5
+    sound: "ENTITY_SLIME_SQUISH"
+    permission-required: true
+
+  quantum_collapse:
+    name: "&9&lQuantum Collapse"
+    description:
+      - "&7The victim phases between"
+      - "&7dimensions before"
+      - "&7completely disappearing"
+    icon: "ENDER_PEARL"
+    duration: 90
+    intensity: 5
+    radius: 4
+    sound: "ENTITY_ENDERMAN_DEATH"
+    permission-required: true
+
+  supernova:
+    name: "&f&lSupernova"
+    description:
+      - "&7An intense white light"
+      - "&7explosion illuminates"
+      - "&7everything in sight"
+    icon: "GLOWSTONE"
+    duration: 60
+    intensity: 10
+    radius: 8
+    sound: "ENTITY_LIGHTNING_BOLT_THUNDER"
+    permission-required: true
+

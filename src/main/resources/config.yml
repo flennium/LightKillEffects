@@ -29,7 +29,7 @@ general:
   debug: false
 
   # Only trigger effects when killing players (not mobs/animals)
-  players-only: false
+  players-only: true
 
 # Security / Safety Settings
 security:
@@ -44,6 +44,9 @@ security:
 
 # Storage Settings
 storage:
+  # Storage backend: yaml, json, or sqlite.
+  type: "yaml"
+
   # Maximum number of playerdata backups to keep.
   max-backups: 10
 
@@ -97,378 +100,75 @@ gui:
     location-offset: 3  # blocks from player
     cooldown: 5  # seconds between previews
 
-# Effect Categories
-categories:
-  fire:
-    name: "&c&lFire Effects"
-    icon: "BLAZE_POWDER"
-    effects:
-      - "solar_explosion"
-      - "phoenix_rebirth"
-      - "meteor_impact"
-  
-  ice:
-    name: "&b&lIce Effects"
-    icon: "ICE"
-    effects:
-      - "frozen_burst"
-  
-  electric:
-    name: "&e&lElectric Effects"
-    icon: "LIGHTNING_ROD"
-    effects:
-      - "lightning_storm"
-      - "electric_overload"
-  
-  mystical:
-    name: "&5&lMystical Effects"
-    icon: "ENCHANTED_BOOK"
-    effects:
-      - "void_consumption"
-      - "celestial_gateway"
-      - "spectral_haunt"
-      - "time_fracture"
-      - "divine_ascension"
-      - "quantum_collapse"
-  
-  nature:
-    name: "&a&lNature Effects"
-    icon: "OAK_SAPLING"
-    effects:
-      - "crystal_garden"
-      - "bioluminescent_bloom"
-      - "toxic_meltdown"
-  
-  cosmic:
-    name: "&f&lCosmic Effects"
-    icon: "NETHER_STAR"
-    effects:
-      - "starfall_cascade"
-      - "supernova"
-  
-  party:
-    name: "&d&lParty Effects"
-    icon: "JUKEBOX"
-    effects:
-      - "neon_rave"
-      - "prismatic_shatter"
-      - "laser_light_show"
-
-# Individual Effect Configurations
-effects:
-  lightning_storm:
-    name: "&e&lLightning Storm"
-    description:
-      - "&7Multiple lightning bolts strike"
-      - "&7in circular patterns around"
-      - "&7the victim's location"
-    icon: "LIGHTNING_ROD"
-    duration: 60  # ticks
-    intensity: 5  # number of lightning bolts
-    radius: 4     # effect radius
-    sound: "ENTITY_LIGHTNING_BOLT_THUNDER"
-    permission-required: true
-
-  solar_explosion:
-    name: "&6&lSolar Explosion"
-    description:
-      - "&7A golden sphere explodes"
-      - "&7with radiating light rays"
-      - "&7creating a miniature sun"
-    icon: "SUN_CORAL"
-    duration: 80
-    intensity: 8
-    radius: 5
-    sound: "ENTITY_GENERIC_EXPLODE"
-    permission-required: true
-
-  frozen_burst:
-    name: "&b&lFrozen Burst"
-    description:
-      - "&7Ice-blue spiraling particles"
-      - "&7with shattering ice blocks"
-      - "&7freeze the area solid"
-    icon: "PACKED_ICE"
-    duration: 70
-    intensity: 6
-    radius: 4
-    sound: "BLOCK_GLASS_BREAK"
-    permission-required: true
-
-  neon_rave:
-    name: "&d&lNeon Rave"
-    description:
-      - "&7Rapidly cycling colored lights"
-      - "&7create a disco party"
-      - "&7around the death location"
-    icon: "REDSTONE_LAMP"
-    duration: 100
-    intensity: 10
-    radius: 6
-    sound: "BLOCK_NOTE_BLOCK_BASS"
-    permission-required: true
-
-  starfall_cascade:
-    name: "&f&lStarfall Cascade"
-    description:
-      - "&7Glowing particles fall"
-      - "&7like shooting stars from"
-      - "&7the heavens above"
-    icon: "NETHER_STAR"
-    duration: 120
-    intensity: 7
-    radius: 8
-    sound: "ENTITY_EXPERIENCE_ORB_PICKUP"
-    permission-required: true
-
-  prismatic_shatter:
-    name: "&c&lP&6r&ei&as&bm&9a&dt&5i&cc &6S&eh&aa&bt&9t&de&5r"
-    description:
-      - "&7Rainbow glass particles"
-      - "&7scatter with a beacon"
-      - "&7creating prismatic beauty"
-    icon: "GLASS"
-    duration: 60
-    intensity: 4
-    radius: 3
-    sound: "BLOCK_GLASS_BREAK"
-    permission-required: false
-
-  void_consumption:
-    name: "&5&lVoid Consumption"
-    description:
-      - "&7A dark purple spiral"
-      - "&7creates a black hole effect"
-      - "&7consuming all light"
-    icon: "OBSIDIAN"
-    duration: 90
-    intensity: 6
-    radius: 5
-    sound: "ENTITY_WITHER_SPAWN"
-    permission-required: true
-
-  phoenix_rebirth:
-    name: "&c&lPhoenix Rebirth"
-    description:
-      - "&7Flame particles form"
-      - "&7majestic wing patterns"
-      - "&7rising from the ashes"
-    icon: "BLAZE_POWDER"
-    duration: 100
-    intensity: 8
-    radius: 6
-    sound: "ENTITY_BLAZE_SHOOT"
-    permission-required: true
-
-  celestial_gateway:
-    name: "&5&lCelestial Gateway"
-    description:
-      - "&7A rotating light portal"
-      - "&7opens to the cosmos"
-      - "&7with swirling energy"
-    icon: "END_PORTAL_FRAME"
-    duration: 110
-    intensity: 7
-    radius: 4
-    sound: "BLOCK_END_PORTAL_SPAWN"
-    permission-required: true
-
-  electric_overload:
-    name: "&e&lElectric Overload"
-    description:
-      - "&7Blue electrical particles"
-      - "&7jump chaotically between"
-      - "&7points of energy"
-    icon: "REDSTONE"
-    duration: 80
-    intensity: 9
-    radius: 5
-    sound: "ENTITY_LIGHTNING_BOLT_IMPACT"
-    permission-required: true
-
-  crystal_garden:
-    name: "&a&lCrystal Garden"
-    description:
-      - "&7Glowing crystal blocks"
-      - "&7sprout from the ground"
-      - "&7creating a magical garden"
-    icon: "EMERALD_BLOCK"
-    duration: 140
-    intensity: 5
-    radius: 6
-    sound: "BLOCK_AMETHYST_BLOCK_CHIME"
-    permission-required: true
-
-  spectral_haunt:
-    name: "&7&lSpectral Haunt"
-    description:
-      - "&7A ghostly silhouette"
-      - "&7of the victim appears"
-      - "&7before fading away"
-    icon: "SKELETON_SKULL"
-    duration: 100
-    intensity: 4
-    radius: 3
-    sound: "ENTITY_GHAST_AMBIENT"
-    permission-required: true
-
-  laser_light_show:
-    name: "&c&lLaser Light Show"
-    description:
-      - "&7Intersecting colored"
-      - "&7laser beams create"
-      - "&7a spectacular light show"
-    icon: "BEACON"
-    duration: 120
-    intensity: 8
-    radius: 7
-    sound: "BLOCK_BEACON_ACTIVATE"
-    permission-required: true
-
-  meteor_impact:
-    name: "&c&lMeteor Impact"
-    description:
-      - "&7A fiery meteor crashes"
-      - "&7creating a burning crater"
-      - "&7at the impact site"
-    icon: "MAGMA_BLOCK"
-    duration: 100
-    intensity: 6
-    radius: 5
-    sound: "ENTITY_GENERIC_EXPLODE"
-    permission-required: true
-
-  bioluminescent_bloom:
-    name: "&a&lBioluminescent Bloom"
-    description:
-      - "&7Gentle spore-like particles"
-      - "&7spread a soft glowing"
-      - "&7bioluminescent effect"
-    icon: "GLOWSTONE_DUST"
-    duration: 90
-    intensity: 4
-    radius: 4
-    sound: "BLOCK_GRASS_BREAK"
-    permission-required: false
-
-  time_fracture:
-    name: "&8&lTime Fracture"
-    description:
-      - "&7Reality cracks and fractures"
-      - "&7around the death location"
-      - "&7bending time itself"
-    icon: "CLOCK"
-    duration: 80
-    intensity: 6
-    radius: 4
-    sound: "ENTITY_ENDERMAN_TELEPORT"
-    permission-required: true
-
-  divine_ascension:
-    name: "&6&lDivine Ascension"
-    description:
-      - "&7A golden double helix"
-      - "&7spiral carries the soul"
-      - "&7to divine heights"
-    icon: "GOLDEN_APPLE"
-    duration: 130
-    intensity: 7
-    radius: 5
-    sound: "ENTITY_PLAYER_LEVELUP"
-    permission-required: true
-
-  toxic_meltdown:
-    name: "&2&lToxic Meltdown"
-    description:
-      - "&7Bubbling green particles"
-      - "&7spread corrosively"
-      - "&7melting everything nearby"
-    icon: "SLIME_BALL"
-    duration: 110
-    intensity: 6
-    radius: 5
-    sound: "ENTITY_SLIME_SQUISH"
-    permission-required: true
-
-  quantum_collapse:
-    name: "&9&lQuantum Collapse"
-    description:
-      - "&7The victim phases between"
-      - "&7dimensions before"
-      - "&7completely disappearing"
-    icon: "ENDER_PEARL"
-    duration: 90
-    intensity: 5
-    radius: 4
-    sound: "ENTITY_ENDERMAN_DEATH"
-    permission-required: true
-
-  supernova:
-    name: "&f&lSupernova"
-    description:
-      - "&7An intense white light"
-      - "&7explosion illuminates"
-      - "&7everything in sight"
-    icon: "GLOWSTONE"
-    duration: 60
-    intensity: 10
-    radius: 8
-    sound: "ENTITY_LIGHTNING_BOLT_THUNDER"
-    permission-required: true
-
-# Messages Configuration
-messages:
-  prefix: "&8[&eLKE&8] "
-  
-  # Success messages
-  effect-set: "&aYour kill effect has been set to &e{effect}&a!"
-  effect-disabled: "&aYour kill effect has been disabled!"
-  config-reloaded: "&aConfiguration reloaded successfully!"
-  
-  # Error messages
-  no-permission: "&cYou don't have permission to use this effect!"
-  effect-not-found: "&cEffect '&e{effect}&c' not found!"
-  effect-locked: "&cThis effect is locked! You need permission to use it."
-  on-cooldown: "&cYou must wait &e{seconds} &cseconds before using another effect!"
-  
-  # GUI messages
-  gui-opened: "&aOpened kill effects menu!"
-  effect-previewed: "&aPreview of &e{effect} &acompleted!"
-  favorite-added: "&aAdded &e{effect} &ato your favorites!"
-  favorite-removed: "&aRemoved &e{effect} &afrom your favorites!"
-  favorites-full: "&cYour favorites list is full! Remove one to add another."
-  
-  # Info messages
-  current-effect: "&7Your current kill effect: &e{effect}"
-  effects-available: "&7You have access to &e{count} &7kill effects!"
-  
-  # Additional messages
-  plugin-not-ready: "&cPlugin is not ready yet. Please try again in a moment."
-  players-only: "&cThis command can only be used by players!"
-  usage-set: "&cUsage: /killeffects set <effect> [player]"
-  usage-preview: "&cUsage: /killeffects preview <effect>"
-  usage-favorite: "&cUsage: /killeffects favorite <add|remove> <effect>"
-  player-not-found: "&cPlayer '{player}' not found!"
-  target-no-permission: "&cPlayer {player} doesn't have permission to use kill effects!"
-  effect-no-permission: "&cYou don't have permission to use {effect}!"
-  effect-disabled-other: "&aDisabled kill effect for {player}!"
-  effect-set-other: "&aSet kill effect for {player} to {effect}!"
-  effect-unlocked: "&aUnlocked new effect: {effect}!"
-  effect-locked-notification: "&cLost access to effect: {effect}"
-  effect-triggered: "&e{effect} activated!"
-  reload-error: "&cError occurred while reloading plugin!"
-  already-favorite: "&e{effect} is already in your favorites!"
-  not-favorite: "&e{effect} is not in your favorites!"
-  preview-disabled: "&cEffect previews are currently disabled!"
-  preview-cooldown: "&cYou must wait {seconds} seconds before previewing another effect!"
-  
-  # Command help
-  help:
-    - "&6&lKill Effects Commands:"
-    - "&e/killeffects gui &7- Open the effects menu"
-    - "&e/killeffects set <effect> &7- Set your kill effect"
-    - "&e/killeffects set none &7- Disable your kill effect"
-    - "&e/killeffects preview <effect> &7- Preview an effect"
-    - "&e/killeffects favorite add/remove <effect> &7- Manage favorites"
-    - "&e/killeffects info &7- View your statistics"
-    - "&e/killeffects reload &7- Reload configuration &c(Admin)"
+  menus:
+    border:
+      material: "GRAY_STAINED_GLASS_PANE"
+      name: "&8 "
+    current-effect:
+      empty-item:
+        material: "BARRIER"
+        name: "&cNo Effect Selected"
+        lore:
+          - "&7You don't have an effect selected"
+          - "&7Click on effects below to select one."
+    favorites:
+      title: "&6&lFavorite Effects"
+      item:
+        material: "NETHER_STAR"
+        name: "&6Favorite Effects"
+        lore:
+          - "&7View your favorite effects"
+          - "&7({favorites}/{max_favorites} favorites)"
+          - ""
+          - "&eClick to open favorites menu"
+      empty-item:
+        material: "BARRIER"
+        name: "&cNo Favorite Effects"
+        lore:
+          - "&7You haven't added any effects"
+          - "&7to your favorites yet."
+          - ""
+          - "&eRight-click effects in categories"
+          - "&eto add them to favorites"
+    info:
+      item:
+        material: "BOOK"
+        name: "&bYour Statistics"
+        lore:
+          - "&7Total kills: &f{kills}"
+          - "&7Unlocked effects: &f{unlocked}/{total}"
+          - "&7Favorites: &f{favorites}"
+          - ""
+          - "&eClick for detailed statistics"
+    category-item:
+      effects-count: "&7Effects: &f{count}"
+      unlocked-count: "&7Unlocked: &f{unlocked}/{total}"
+      action: "&eClick to browse effects"
+    effect-item:
+      selected: "&aSelected"
+      locked: "&cLocked"
+      requires-permission: "&cRequires permission"
+      select-action: "&eClick to select"
+      favorite: "&6Favorite"
+      favorite-label: "&6Favorite Effect"
+      usage: "&7Used {usage} times"
+      left-click: "&7Left-click: Select effect"
+      middle-click: "&7Middle-click: Preview effect"
+      right-click-add: "&7Right-click: Add to favorites"
+      right-click-remove: "&7Right-click: Remove from favorites"
+      remove-favorite-action: "&7Right-click to remove from favorites"
+    back-item:
+      material: "ARROW"
+      name: "&aBack"
+      lore:
+        - "&7Return to main menu"
+    previous-page:
+      material: "ARROW"
+      name: "&aPrevious Page"
+      lore:
+        - "&7Page {page}/{pages}"
+    next-page:
+      material: "ARROW"
+      name: "&aNext Page"
+      lore:
+        - "&7Page {page}/{pages}"

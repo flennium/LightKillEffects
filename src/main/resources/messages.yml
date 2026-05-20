@@ -1,0 +1,55 @@
+messages:
+  prefix: "&8[&eLKE&8] "
+  
+  # Success messages
+  effect-set: "&aYour kill effect has been set to &e{effect}&a!"
+  effect-disabled: "&aYour kill effect has been disabled!"
+  config-reloaded: "&aConfiguration reloaded successfully!"
+  
+  # Error messages
+  no-permission: "&cYou don't have permission to use this effect!"
+  effect-not-found: "&cEffect '&e{effect}&c' not found!"
+  effect-locked: "&cThis effect is locked! You need permission to use it."
+  on-cooldown: "&cYou must wait &e{seconds} &cseconds before using another effect!"
+  
+  # GUI messages
+  gui-opened: "&aOpened kill effects menu!"
+  effect-previewed: "&aPreview of &e{effect} &acompleted!"
+  favorite-added: "&aAdded &e{effect} &ato your favorites!"
+  favorite-removed: "&aRemoved &e{effect} &afrom your favorites!"
+  favorites-full: "&cYour favorites list is full! Remove one to add another."
+  
+  # Info messages
+  current-effect: "&7Your current kill effect: &e{effect}"
+  effects-available: "&7You have access to &e{count} &7kill effects!"
+  
+  # Additional messages
+  plugin-not-ready: "&cPlugin is not ready yet. Please try again in a moment."
+  players-only: "&cThis command can only be used by players!"
+  usage-set: "&cUsage: /killeffects set <effect> [player]"
+  usage-preview: "&cUsage: /killeffects preview <effect>"
+  usage-favorite: "&cUsage: /killeffects favorite <add|remove> <effect>"
+  player-not-found: "&cPlayer '{player}' not found!"
+  target-no-permission: "&cPlayer {player} doesn't have permission to use kill effects!"
+  effect-no-permission: "&cYou don't have permission to use {effect}!"
+  effect-disabled-other: "&aDisabled kill effect for {player}!"
+  effect-set-other: "&aSet kill effect for {player} to {effect}!"
+  effect-unlocked: "&aUnlocked new effect: {effect}!"
+  effect-locked-notification: "&cLost access to effect: {effect}"
+  effect-triggered: "&e{effect} activated!"
+  reload-error: "&cError occurred while reloading plugin!"
+  already-favorite: "&e{effect} is already in your favorites!"
+  not-favorite: "&e{effect} is not in your favorites!"
+  preview-disabled: "&cEffect previews are currently disabled!"
+  preview-cooldown: "&cYou must wait {seconds} seconds before previewing another effect!"
+  
+  # Command help
+  help:
+    - "&6&lKill Effects Commands:"
+    - "&e/killeffects gui &7- Open the effects menu"
+    - "&e/killeffects set <effect> &7- Set your kill effect"
+    - "&e/killeffects set none &7- Disable your kill effect"
+    - "&e/killeffects preview <effect> &7- Preview an effect"
+    - "&e/killeffects favorite add/remove <effect> &7- Manage favorites"
+    - "&e/killeffects info &7- View your statistics"
+    - "&e/killeffects reload &7- Reload configuration &c(Admin)"

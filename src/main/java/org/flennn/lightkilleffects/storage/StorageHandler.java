@@ -1,171 +1,275 @@
 package org.flennn.lightkilleffects.storage;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.flennn.lightkilleffects.LightKillEffects;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-/**
- * Handles data storage and persistence for player data and plugin configuration
- */
 public class StorageHandler {
-    
+    private static final String SQLITE_KEY = "playerdata_yaml";
+
     private final LightKillEffects plugin;
+    private final Gson gson = new Gson();
+    private File dataDir;
     private File playerDataFile;
     private FileConfiguration playerDataConfig;
-    
+    private String backend;
+
     public StorageHandler(LightKillEffects plugin) {
         this.plugin = plugin;
         setupDataFiles();
     }
-    
-    /**
-     * Setup and create necessary data files
-     */
+
     private void setupDataFiles() {
-        // Ensure data folder exists
         if (!plugin.getDataFolder().exists() && !plugin.getDataFolder().mkdirs()) {
             plugin.getLogger().severe("Could not create plugin data folder.");
         }
-        
-        // Setup player data file
-        playerDataFile = new File(plugin.getDataFolder(), "playerdata.yml");
-        if (!playerDataFile.exists()) {
-            plugin.saveResource("playerdata.yml", false);
+
+        this.dataDir = new File(plugin.getDataFolder(), "data");
+        if (!this.dataDir.exists() && !this.dataDir.mkdirs()) {
+            plugin.getLogger().severe("Could not create data folder.");
         }
-        
-        playerDataConfig = YamlConfiguration.loadConfiguration(playerDataFile);
-        
-        plugin.logDebug("Data files setup completed");
+
+        this.backend = plugin.getSettings().storageType();
+        this.playerDataFile = new File(this.dataDir, storageFileName(this.backend));
+        this.playerDataConfig = new YamlConfiguration();
+        migrateLegacyYaml();
+        if (migrateDataFolderYaml()) {
+            plugin.logDebug("Existing YAML player data migrated to " + this.backend);
+            return;
+        }
+        loadBackend();
+        plugin.logDebug("Player data backend: " + this.backend);
     }
-    
-    /**
-     * Save player data to file
-     */
-    public void savePlayerData() {
+
+    private String storageFileName(String backend) {
+        if ("json".equals(backend)) {
+            return "playerdata.json";
+        }
+        if ("sqlite".equals(backend)) {
+            return "playerdata.db";
+        }
+        return "playerdata.yml";
+    }
+
+    private void migrateLegacyYaml() {
+        File oldFile = new File(plugin.getDataFolder(), "playerdata.yml");
+        if (!oldFile.exists() || this.playerDataFile.exists() || !"yaml".equals(this.backend)) {
+            return;
+        }
+
         try {
-            playerDataConfig.save(playerDataFile);
-            plugin.logDebug("Player data saved successfully");
+            Files.move(oldFile.toPath(), this.playerDataFile.toPath());
+            plugin.logInfo("&aMoved old playerdata.yml into the data folder.");
         } catch (IOException e) {
-            plugin.getLogger().severe("Could not save player data: " + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().warning("Could not move old playerdata.yml: " + e.getMessage());
         }
     }
-    
-    /**
-     * Reload player data from file
-     */
-    public void reloadPlayerData() {
-        try {
-            playerDataConfig = YamlConfiguration.loadConfiguration(playerDataFile);
-            plugin.logDebug("Player data reloaded successfully");
-        } catch (Exception e) {
-            plugin.getLogger().severe("Could not reload player data: " + e.getMessage());
-            e.printStackTrace();
+
+    private boolean migrateDataFolderYaml() {
+        File yamlFile = new File(this.dataDir, "playerdata.yml");
+        if ("yaml".equals(this.backend) || this.playerDataFile.exists() || !yamlFile.exists()) {
+            return false;
         }
-    }
-    
-    /**
-     * Save all data (called on disable)
-     */
-    public void saveAllData() {
-        savePlayerData();
-        plugin.logDebug("All data saved");
-    }
-    
-    /**
-     * Create backup of player data
-     */
-    public boolean createBackup() {
+
         try {
-            File backupDir = new File(plugin.getDataFolder(), "backups");
-            if (!backupDir.exists()) {
-                backupDir.mkdirs();
-            }
-            
-            String timestamp = String.valueOf(System.currentTimeMillis());
-            File backupFile = new File(backupDir, "playerdata_" + timestamp + ".yml");
-            
-            Files.copy(playerDataFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            plugin.logInfo("&aBackup created: " + backupFile.getName());
-            
-            // Clean old backups (keep only last 10)
-            cleanOldBackups(backupDir);
-            
+            this.playerDataConfig.load(yamlFile);
+            saveBackend();
             return true;
         } catch (Exception e) {
-            plugin.getLogger().severe("Failed to create backup: " + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().warning("Could not migrate existing YAML player data: " + e.getMessage());
             return false;
         }
     }
-    
-    /**
-     * Clean old backup files, keeping only the most recent ones
-     */
+
+    private void loadBackend() {
+        try {
+            if ("json".equals(this.backend)) {
+                loadJson();
+            } else if ("sqlite".equals(this.backend)) {
+                loadSqlite();
+            } else {
+                loadYaml();
+            }
+        } catch (Exception e) {
+            this.playerDataConfig = new YamlConfiguration();
+            plugin.getLogger().severe("Could not load player data: " + e.getMessage());
+        }
+    }
+
+    private void loadYaml() throws IOException, InvalidConfigurationException {
+        if (!this.playerDataFile.exists()) {
+            this.playerDataFile.createNewFile();
+        }
+        this.playerDataConfig.load(this.playerDataFile);
+    }
+
+    private void loadJson() throws IOException, InvalidConfigurationException {
+        if (!this.playerDataFile.exists()) {
+            saveJson("");
+            return;
+        }
+
+        try (FileReader reader = new FileReader(this.playerDataFile, StandardCharsets.UTF_8)) {
+            JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+            String yaml = root.has("yaml") ? root.get("yaml").getAsString() : "";
+            this.playerDataConfig.loadFromString(yaml);
+        }
+    }
+
+    private void loadSqlite() throws SQLException, InvalidConfigurationException {
+        ensureSqliteTable();
+        try (Connection connection = openSqlite();
+             PreparedStatement statement = connection.prepareStatement("SELECT data_value FROM plugin_data WHERE data_key = ?")) {
+            statement.setString(1, SQLITE_KEY);
+            try (ResultSet result = statement.executeQuery()) {
+                if (result.next()) {
+                    this.playerDataConfig.loadFromString(result.getString("data_value"));
+                }
+            }
+        }
+    }
+
+    public void savePlayerData() {
+        try {
+            saveBackend();
+            plugin.logDebug("Player data saved");
+        } catch (Exception e) {
+            plugin.getLogger().severe("Could not save player data: " + e.getMessage());
+        }
+    }
+
+    private void saveBackend() throws IOException, SQLException {
+        String yaml = this.playerDataConfig.saveToString();
+        if ("json".equals(this.backend)) {
+            saveJson(yaml);
+        } else if ("sqlite".equals(this.backend)) {
+            saveSqlite(yaml);
+        } else {
+            this.playerDataConfig.save(this.playerDataFile);
+        }
+    }
+
+    private void saveJson(String yaml) throws IOException {
+        JsonObject root = new JsonObject();
+        root.addProperty("format", "yaml");
+        root.addProperty("yaml", yaml);
+        try (FileWriter writer = new FileWriter(this.playerDataFile, StandardCharsets.UTF_8)) {
+            this.gson.toJson(root, writer);
+        }
+    }
+
+    private void saveSqlite(String yaml) throws SQLException {
+        ensureSqliteTable();
+        try (Connection connection = openSqlite();
+             PreparedStatement statement = connection.prepareStatement(
+                     "INSERT INTO plugin_data(data_key, data_value) VALUES(?, ?) " +
+                             "ON CONFLICT(data_key) DO UPDATE SET data_value = excluded.data_value")) {
+            statement.setString(1, SQLITE_KEY);
+            statement.setString(2, yaml);
+            statement.executeUpdate();
+        }
+    }
+
+    private void ensureSqliteTable() throws SQLException {
+        try (Connection connection = openSqlite();
+             PreparedStatement statement = connection.prepareStatement(
+                     "CREATE TABLE IF NOT EXISTS plugin_data (data_key TEXT PRIMARY KEY, data_value TEXT NOT NULL)")) {
+            statement.executeUpdate();
+        }
+    }
+
+    private Connection openSqlite() throws SQLException {
+        return DriverManager.getConnection("jdbc:sqlite:" + this.playerDataFile.getAbsolutePath());
+    }
+
+    public void reloadPlayerData() {
+        loadBackend();
+        plugin.logDebug("Player data reloaded");
+    }
+
+    public void saveAllData() {
+        savePlayerData();
+    }
+
+    public boolean createBackup() {
+        try {
+            File backupDir = new File(this.dataDir, "backups");
+            if (!backupDir.exists() && !backupDir.mkdirs()) {
+                return false;
+            }
+
+            File backupFile = new File(backupDir, "playerdata_" + System.currentTimeMillis() + ".yml");
+            Files.writeString(backupFile.toPath(), this.playerDataConfig.saveToString(), StandardCharsets.UTF_8);
+            cleanOldBackups(backupDir);
+            plugin.logInfo("&aBackup created: " + backupFile.getName());
+            return true;
+        } catch (Exception e) {
+            plugin.getLogger().severe("Failed to create backup: " + e.getMessage());
+            return false;
+        }
+    }
+
     private void cleanOldBackups(File backupDir) {
         File[] backupFiles = backupDir.listFiles((dir, name) -> name.startsWith("playerdata_") && name.endsWith(".yml"));
         int maxBackups = plugin.getSettings().maxBackups();
         if (backupFiles == null || backupFiles.length <= maxBackups) {
             return;
         }
-        
-        // Sort by modification time (newest first)
+
         java.util.Arrays.sort(backupFiles, (a, b) -> Long.compare(b.lastModified(), a.lastModified()));
-        
-        // Delete files beyond the 10 most recent
         for (int i = maxBackups; i < backupFiles.length; i++) {
             if (backupFiles[i].delete()) {
                 plugin.logDebug("Deleted old backup: " + backupFiles[i].getName());
             }
         }
     }
-    
-    /**
-     * Import player data from another file
-     */
+
     public boolean importPlayerData(File importFile) {
         try {
             if (!isSafeDataFile(importFile) || !importFile.exists() || !importFile.isFile()) {
-                plugin.logInfo("&cImport file does not exist: " + importFile.getName());
+                plugin.logInfo("&cImport file is not allowed: " + safeName(importFile));
                 return false;
             }
-            
+
             FileConfiguration importConfig = YamlConfiguration.loadConfiguration(importFile);
-            
-            // Create backup before importing
             if (plugin.getSettings().backupBeforeImport()) {
                 createBackup();
             }
-            
-            // Import data
+
             for (String key : importConfig.getKeys(true)) {
-                playerDataConfig.set(key, importConfig.get(key));
+                this.playerDataConfig.set(key, importConfig.get(key));
             }
-            
+
             savePlayerData();
-            plugin.logInfo("&aPlayer data imported successfully from: " + importFile.getName());
-            
+            plugin.logInfo("&aPlayer data imported from: " + importFile.getName());
             return true;
         } catch (Exception e) {
             plugin.getLogger().severe("Failed to import player data: " + e.getMessage());
-            e.printStackTrace();
             return false;
         }
     }
-    
-    /**
-     * Export player data to a file
-     */
+
     public boolean exportPlayerData(File exportFile) {
         try {
             if (!isSafeDataFile(exportFile)) {
-                plugin.logInfo("&cExport path is not allowed: " + exportFile.getName());
+                plugin.logInfo("&cExport path is not allowed: " + safeName(exportFile));
                 return false;
             }
 
@@ -175,62 +279,38 @@ public class StorageHandler {
                 return false;
             }
 
-            FileConfiguration exportConfig = new YamlConfiguration();
-            
-            // Copy all player data
-            for (String key : playerDataConfig.getKeys(true)) {
-                exportConfig.set(key, playerDataConfig.get(key));
-            }
-            
-            exportConfig.save(exportFile);
-            plugin.logInfo("&aPlayer data exported successfully to: " + exportFile.getName());
-            
+            Files.writeString(exportFile.toPath(), this.playerDataConfig.saveToString(), StandardCharsets.UTF_8);
+            plugin.logInfo("&aPlayer data exported to: " + exportFile.getName());
             return true;
         } catch (Exception e) {
             plugin.getLogger().severe("Failed to export player data: " + e.getMessage());
-            e.printStackTrace();
             return false;
         }
     }
-    
-    /**
-     * Check if storage is healthy
-     */
+
     public boolean isHealthy() {
-        return playerDataFile.exists() && playerDataFile.canRead() && playerDataFile.canWrite();
+        return this.playerDataFile.exists() && this.playerDataFile.canRead() && this.playerDataFile.canWrite();
     }
-    
-    /**
-     * Get storage statistics
-     */
+
     public StorageStats getStorageStats() {
         return new StorageStats(
-                playerDataFile.length(),
-                playerDataConfig.getKeys(false).size(),
-                playerDataFile.lastModified()
+                this.playerDataFile.exists() ? this.playerDataFile.length() : 0,
+                this.playerDataConfig.getKeys(false).size(),
+                this.playerDataFile.exists() ? this.playerDataFile.lastModified() : 0
         );
     }
-    
-    /**
-     * Reset all player data (dangerous operation)
-     */
+
     public boolean resetAllPlayerData() {
         try {
-            // Create backup before reset
             createBackup();
-            
-            // Clear all data
-            for (String key : playerDataConfig.getKeys(false)) {
-                playerDataConfig.set(key, null);
+            for (String key : this.playerDataConfig.getKeys(false)) {
+                this.playerDataConfig.set(key, null);
             }
-            
             savePlayerData();
-            plugin.logInfo("&cAll player data has been reset!");
-            
+            plugin.logInfo("&cAll player data has been reset.");
             return true;
         } catch (Exception e) {
             plugin.getLogger().severe("Failed to reset player data: " + e.getMessage());
-            e.printStackTrace();
             return false;
         }
     }
@@ -244,38 +324,38 @@ public class StorageHandler {
             return true;
         }
 
-        Path dataFolder = plugin.getDataFolder().getCanonicalFile().toPath();
+        Path root = this.dataDir.getCanonicalFile().toPath();
         Path target = file.getCanonicalFile().toPath();
-        return target.startsWith(dataFolder);
+        return target.startsWith(root);
     }
-    
-    // Getters
+
+    private String safeName(File file) {
+        return file == null ? "null" : file.getName();
+    }
+
     public FileConfiguration getPlayerDataConfig() {
-        return playerDataConfig;
+        return this.playerDataConfig;
     }
-    
+
     public File getPlayerDataFile() {
-        return playerDataFile;
+        return this.playerDataFile;
     }
-    
-    /**
-     * Data class for storage statistics
-     */
+
     public static class StorageStats {
         private final long fileSize;
         private final int playerCount;
         private final long lastModified;
-        
+
         public StorageStats(long fileSize, int playerCount, long lastModified) {
             this.fileSize = fileSize;
             this.playerCount = playerCount;
             this.lastModified = lastModified;
         }
-        
+
         public long getFileSize() { return fileSize; }
         public int getPlayerCount() { return playerCount; }
         public long getLastModified() { return lastModified; }
-        
+
         public String getFormattedFileSize() {
             if (fileSize < 1024) return fileSize + " B";
             if (fileSize < 1024 * 1024) return String.format("%.1f KB", fileSize / 1024.0);

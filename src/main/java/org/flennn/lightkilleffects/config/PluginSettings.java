@@ -41,6 +41,19 @@ public final class PluginSettings {
         return this.config.getBoolean("storage.restrict-imports-to-data-folder", true);
     }
 
+    public String storageType() {
+        String value = this.config.getString("storage.type", "yaml");
+        if (value == null) {
+            return "yaml";
+        }
+
+        value = value.toLowerCase(java.util.Locale.ROOT);
+        if (!value.equals("yaml") && !value.equals("json") && !value.equals("sqlite")) {
+            return "yaml";
+        }
+        return value;
+    }
+
     public int guiSize() {
         int size = this.config.getInt("gui.size", 54);
         if (size % 9 != 0) {

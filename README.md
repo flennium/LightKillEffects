@@ -11,7 +11,8 @@ Built for servers that want polished kill feedback without heavy dependencies or
 - Per-effect permissions
 - Optional previews with cooldowns
 - Player kill and effect usage stats
-- Configurable particles, sounds, render distance, cooldowns, and messages
+- Configurable particles, sounds, render distance, cooldowns, categories, effects, and messages
+- YAML, JSON, or SQLite player data storage
 - Safe player data backups and restricted import/export paths
 - Performance mode for busier servers
 
@@ -26,7 +27,7 @@ Built for servers that want polished kill feedback without heavy dependencies or
 1. Download `lightkilleffects-<version>.jar` from Releases.
 2. Put it in your server `plugins` folder.
 3. Restart the server.
-4. Edit `plugins/LightKillEffects/config.yml`.
+4. Edit the files in `plugins/LightKillEffects`.
 5. Run `/killeffects reload`.
 
 ## Commands
@@ -56,17 +57,21 @@ Aliases: `/ke`, `/effects`
 
 ## Configuration
 
-Most behavior is controlled in `config.yml`.
+Configuration is split so the main file stays readable:
 
-Useful sections:
+- `config.yml` - behavior, GUI/menu items, performance, storage, and safety settings
+- `categories.yml` - category names, icons, and effect lists
+- `effects.yml` - effect names, icons, sounds, and descriptions
+- `messages.yml` - player-facing text and command help
 
-- `general` - enable state, defaults, cooldowns, notifications
-- `security` - mob kill effects, console control, preview unlock checks
-- `performance` - particle limits, render distance, cleanup interval
-- `storage` - backup limits and import/export safety
-- `gui` - title, sounds, click cooldowns, preview settings
-- `effects` - display names, icons, sounds, descriptions
-- `messages` - all player-facing text
+Player data is kept under `plugins/LightKillEffects/data`. Set `storage.type` to `yaml`, `json`, or `sqlite`.
+
+## Roadmap
+
+Next goal: trials. The plan is to support two effect tracks:
+
+- Kill effects: effects that run after a player gets a kill
+- Trial effects: particles that spawn at the player's feet while walking
 
 ## Building
 
@@ -79,13 +84,3 @@ The jar is created in:
 ```text
 target/lightkilleffects-<version>.jar
 ```
-
-## Versioning
-
-LightKillEffects uses semantic versioning.
-
-- Patch: bug fixes, for example `1.1.1`
-- Minor: compatible features/config additions, for example `1.2.0`
-- Major: breaking changes, for example `2.0.0`
-
-Tags use `v<version>`, such as `v1.1.0`.

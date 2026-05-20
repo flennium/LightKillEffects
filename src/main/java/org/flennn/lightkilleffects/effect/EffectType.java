@@ -3,10 +3,6 @@ package org.flennn.lightkilleffects.effect;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-
-/**
- * Enum representing all available kill effects with their properties
- */
 public enum EffectType {
     
     LIGHTNING_STORM("lightning_storm", "Lightning Storm", Material.LIGHTNING_ROD, 
@@ -74,7 +70,7 @@ public enum EffectType {
     private final Material iconMaterial;
     private final Particle primaryParticle;
     private final Sound sound;
-    private final int duration; // in ticks
+    private final int duration;
     private final int intensity;
     private final int radius;
     
@@ -125,10 +121,6 @@ public enum EffectType {
     public String getPermissionNode() {
         return "killeffects.use." + configKey;
     }
-    
-    /**
-     * Get EffectType by config key
-     */
     public static EffectType fromConfigKey(String configKey) {
         for (EffectType effect : values()) {
             if (effect.getConfigKey().equalsIgnoreCase(configKey)) {
@@ -137,10 +129,6 @@ public enum EffectType {
         }
         return null;
     }
-    
-    /**
-     * Get EffectType by display name
-     */
     public static EffectType fromDisplayName(String displayName) {
         for (EffectType effect : values()) {
             if (effect.getDisplayName().equalsIgnoreCase(displayName)) {
@@ -149,12 +137,7 @@ public enum EffectType {
         }
         return null;
     }
-    
-    /**
-     * Check if this effect requires permission
-     */
     public boolean requiresPermission() {
-        // Default effects that don't require permission - available to all players
         return this != PRISMATIC_SHATTER && this != BIOLUMINESCENT_BLOOM && this != STARFALL_CASCADE;
     }
 }

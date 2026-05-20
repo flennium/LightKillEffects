@@ -1,6 +1,8 @@
 package org.flennn.lightkilleffects;
 
 import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.flennn.lightkilleffects.command.KillEffectCommand;
@@ -13,6 +15,8 @@ import org.flennn.lightkilleffects.storage.PlayerData;
 import org.flennn.lightkilleffects.storage.StorageHandler;
 import org.flennn.lightkilleffects.util.Console;
 
+import java.io.File;
+
 public class LightKillEffects extends JavaPlugin {
     private static LightKillEffects instance;
 
@@ -21,6 +25,9 @@ public class LightKillEffects extends JavaPlugin {
     private PlayerData playerData;
     private EffectMenu effectMenu;
     private PluginSettings settings;
+    private FileConfiguration categoriesConfig;
+    private FileConfiguration effectsConfig;
+    private FileConfiguration messagesConfig;
     private boolean debugMode;
 
     @Override
@@ -66,6 +73,12 @@ public class LightKillEffects extends JavaPlugin {
 
     private void loadConfiguration() {
         reloadConfig();
+        saveExtraConfig("categories.yml");
+        saveExtraConfig("effects.yml");
+        saveExtraConfig("messages.yml");
+        this.categoriesConfig = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "categories.yml"));
+        this.effectsConfig = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "effects.yml"));
+        this.messagesConfig = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "messages.yml"));
         this.settings = new PluginSettings(getConfig());
         validateConfigValues();
         this.debugMode = this.settings.isDebug();
@@ -182,14 +195,33 @@ public class LightKillEffects extends JavaPlugin {
     }
 
     public String getMessage(String key) {
-        String prefix = getConfig().getString("messages.prefix", "&8[&eLKE&8] ");
-        String message = getConfig().getString("messages." + key, "&cMessage not found: " + key);
+        String prefix = this.messagesConfig.getString("messages.prefix", "&8[&eLKE&8] ");
+        String message = this.messagesConfig.getString("messages." + key, "&cMessage not found: " + key);
         return Console.color(prefix + message);
     }
 
+    public FileConfiguration getCategoriesConfig() {
+        return this.categoriesConfig;
+    }
+
+    public FileConfiguration getEffectsConfig() {
+        return this.effectsConfig;
+    }
+
+    public FileConfiguration getMessagesConfig() {
+        return this.messagesConfig;
+    }
+
+    private void saveExtraConfig(String name) {
+        File file = new File(getDataFolder(), name);
+        if (!file.exists()) {
+            saveResource(name, false);
+        }
+    }
+
     public String getMessage(String key, String placeholder, String value) {
-        String prefix = getConfig().getString("messages.prefix", "&8[&eLKE&8] ");
-        String message = getConfig().getString("messages." + key, "&cMessage not found: " + key);
+        String prefix = this.messagesConfig.getString("messages.prefix", "&8[&eLKE&8] ");
+        String message = this.messagesConfig.getString("messages." + key, "&cMessage not found: " + key);
         message = message.replace("{" + placeholder + "}", value);
         return Console.color(prefix + message);
     }

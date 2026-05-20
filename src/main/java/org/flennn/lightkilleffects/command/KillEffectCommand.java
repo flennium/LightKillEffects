@@ -13,10 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-/**
- * Handles all commands for the KillEffects plugin
- */
 public class KillEffectCommand implements CommandExecutor, TabCompleter {
     
     private final LightKillEffects plugin;
@@ -27,13 +23,10 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // Check if plugin is ready
         if (!plugin.isReady()) {
             sender.sendMessage(plugin.getMessage("plugin-not-ready"));
             return true;
         }
-        
-        // No arguments - show help or open GUI for players
         if (args.length == 0) {
             if (sender instanceof Player) {
                 return handleGuiCommand((Player) sender);
@@ -75,10 +68,6 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
                 return true;
         }
     }
-    
-    /**
-     * Handle GUI command
-     */
     private boolean handleGuiCommand(CommandSender sender) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(plugin.getMessage("players-only"));
@@ -86,23 +75,15 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         }
         
         Player player = (Player) sender;
-        
-        // Check permission
         if (!player.hasPermission("killeffects.gui")) {
             player.sendMessage(plugin.getMessage("no-permission"));
             return true;
         }
-        
-        // Open GUI
         plugin.getEffectMenu().openMainMenu(player);
         player.sendMessage(plugin.getMessage("gui-opened"));
         
         return true;
     }
-    
-    /**
-     * Handle set command
-     */
     private boolean handleSetCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage(plugin.getMessage("usage-set"));
@@ -111,8 +92,6 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         
         Player target;
         String effectName;
-        
-        // Check if setting for another player
         if (args.length >= 3 && sender.hasPermission("killeffects.set.others")) {
             if (!(sender instanceof Player) && !plugin.getSettings().allowConsoleSetOthers()) {
                 sender.sendMessage(plugin.getMessage("players-only"));
@@ -133,14 +112,10 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             target = (Player) sender;
             effectName = args[1];
         }
-        
-        // Check permission
         if (!target.hasPermission("killeffects.use")) {
             sender.sendMessage(plugin.getMessage("target-no-permission", "player", target.getName()));
             return true;
         }
-        
-        // Handle "none" to disable effect
         if (effectName.equalsIgnoreCase("none") || effectName.equalsIgnoreCase("off")) {
             PlayerData.PlayerEffectData playerData = plugin.getPlayerData().getPlayerData(target);
             playerData.setSelectedEffect(null);
@@ -152,8 +127,6 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             }
             return true;
         }
-        
-        // Find effect
         EffectType effect = EffectType.fromConfigKey(effectName);
         if (effect == null) {
             effect = EffectType.fromDisplayName(effectName);
@@ -163,25 +136,19 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(plugin.getMessage("effect-not-found", "effect", effectName));
             return true;
         }
-        
-        // Check permissions
         if (!plugin.getPlayerData().hasEffectPermission(target, effect)) {
             sender.sendMessage(plugin.getMessage("effect-no-permission", "effect", effect.getDisplayName()));
             return true;
         }
-        
-        // Check if unlocked
         PlayerData.PlayerEffectData playerData = plugin.getPlayerData().getPlayerData(target);
         if (!playerData.hasUnlockedEffect(effect)) {
             sender.sendMessage(plugin.getMessage("effect-locked", "effect", effect.getDisplayName()));
             return true;
         }
-        
-        // Set effect
         playerData.setSelectedEffect(effect);
         plugin.getPlayerData().savePlayerData(target.getUniqueId());
         
-        String effectDisplayName = plugin.getConfig().getString("effects." + effect.getConfigKey() + ".name", 
+        String effectDisplayName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", 
                                                                 effect.getDisplayName());
         
         target.sendMessage(plugin.getMessage("effect-set", "effect", effectDisplayName));
@@ -192,10 +159,6 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         
         return true;
     }
-    
-    /**
-     * Handle preview command
-     */
     private boolean handlePreviewCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(plugin.getMessage("players-only"));
@@ -208,8 +171,6 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(plugin.getMessage("usage-preview"));
             return true;
         }
-        
-        // Find effect
         EffectType effect = EffectType.fromConfigKey(args[1]);
         if (effect == null) {
             effect = EffectType.fromDisplayName(args[1]);
@@ -219,21 +180,15 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(plugin.getMessage("effect-not-found", "effect", args[1]));
             return true;
         }
-        
-        // Check if previews are enabled
         if (!plugin.getConfig().getBoolean("gui.preview.enabled", true)) {
             player.sendMessage(plugin.getMessage("preview-disabled"));
             return true;
         }
-        
-        // Check preview cooldown
         if (plugin.getEffectMenu().isPlayerOnPreviewCooldown(player)) {
             long remaining = plugin.getEffectMenu().getPlayerRemainingPreviewCooldown(player);
             player.sendMessage(plugin.getMessage("preview-cooldown", "seconds", String.valueOf(remaining)));
             return true;
         }
-        
-        // Check preview permission
         if (!player.hasPermission("killeffects.preview.all") && 
             !plugin.getPlayerData().hasEffectPermission(player, effect)) {
             player.sendMessage(plugin.getMessage("no-permission"));
@@ -246,28 +201,20 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(plugin.getMessage("effect-locked", "effect", effect.getDisplayName()));
             return true;
         }
-        
-        // Execute preview
         org.bukkit.Location previewLocation = player.getLocation().add(
                 player.getLocation().getDirection().multiply(
                         plugin.getConfig().getInt("gui.preview.location-offset", 3)
                 )
         );
-        
-        // Set cooldown before executing
         plugin.getEffectMenu().setPlayerPreviewCooldown(player);
         plugin.getEffectManager().executeEffect(player, previewLocation, effect);
         
-        String effectDisplayName = plugin.getConfig().getString("effects." + effect.getConfigKey() + ".name", 
+        String effectDisplayName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", 
                                                                 effect.getDisplayName());
         player.sendMessage(plugin.getMessage("effect-previewed", "effect", effectDisplayName));
         
         return true;
     }
-    
-    /**
-     * Handle reload command
-     */
     private boolean handleReloadCommand(CommandSender sender) {
         if (!sender.hasPermission("killeffects.reload")) {
             sender.sendMessage(plugin.getMessage("no-permission"));
@@ -285,10 +232,6 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         
         return true;
     }
-    
-    /**
-     * Handle info command
-     */
     private boolean handleInfoCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(plugin.getMessage("players-only"));
@@ -301,7 +244,7 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', "&6&lKill Effects Info:"));
         
         String currentEffect = playerData.getSelectedEffect() != null ? 
-                plugin.getConfig().getString("effects." + playerData.getSelectedEffect().getConfigKey() + ".name", 
+                plugin.getEffectsConfig().getString("effects." + playerData.getSelectedEffect().getConfigKey() + ".name", 
                                             playerData.getSelectedEffect().getDisplayName()) : "None";
         player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', "&7Current Effect: &e" + currentEffect));
         
@@ -317,10 +260,6 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         
         return true;
     }
-    
-    /**
-     * Handle stats command
-     */
     private boolean handleStatsCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(plugin.getMessage("players-only"));
@@ -336,13 +275,11 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', "&7No effects used yet!"));
             return true;
         }
-        
-        // Show top 5 most used effects
         playerData.getEffectStats().entrySet().stream()
                 .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
                 .limit(5)
                 .forEach(entry -> {
-                    String effectName = plugin.getConfig().getString("effects." + entry.getKey().getConfigKey() + ".name", 
+                    String effectName = plugin.getEffectsConfig().getString("effects." + entry.getKey().getConfigKey() + ".name", 
                                                                     entry.getKey().getDisplayName());
                     String message = "&7" + effectName + ": &e" + entry.getValue() + " kills";
                     player.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', message));
@@ -350,10 +287,6 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         
         return true;
     }
-    
-    /**
-     * Handle favorite command
-     */
     private boolean handleFavoriteCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(plugin.getMessage("players-only"));
@@ -369,8 +302,6 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         
         String action = args[1].toLowerCase();
         String effectName = args[2];
-        
-        // Find effect
         EffectType effect = EffectType.fromConfigKey(effectName);
         if (effect == null) {
             effect = EffectType.fromDisplayName(effectName);
@@ -382,14 +313,12 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         }
         
         PlayerData.PlayerEffectData playerData = plugin.getPlayerData().getPlayerData(player);
-        
-        // Check if player has the effect unlocked
         if (!playerData.hasUnlockedEffect(effect)) {
             player.sendMessage(plugin.getMessage("effect-locked", "effect", effect.getDisplayName()));
             return true;
         }
         
-        String effectDisplayName = plugin.getConfig().getString("effects." + effect.getConfigKey() + ".name", 
+        String effectDisplayName = plugin.getEffectsConfig().getString("effects." + effect.getConfigKey() + ".name", 
                                                                 effect.getDisplayName());
         
         switch (action) {
@@ -422,12 +351,8 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         
         return true;
     }
-    
-    /**
-     * Send help message
-     */
     private void sendHelpMessage(CommandSender sender) {
-        List<String> helpLines = plugin.getConfig().getStringList("messages.help");
+        List<String> helpLines = plugin.getMessagesConfig().getStringList("messages.help");
         for (String line : helpLines) {
             sender.sendMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', line));
         }
@@ -438,7 +363,6 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
         
         if (args.length == 1) {
-            // Main subcommands
             completions.addAll(Arrays.asList("gui", "set", "preview", "reload", "info", "stats", "favorite", "help"));
         } else if (args.length == 2) {
             String subCommand = args[0].toLowerCase();
@@ -446,7 +370,6 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             switch (subCommand) {
                 case "set":
                 case "preview":
-                    // Effect names
                     completions.add("none");
                     for (EffectType effect : EffectType.values()) {
                         completions.add(effect.getConfigKey());
@@ -461,25 +384,20 @@ public class KillEffectCommand implements CommandExecutor, TabCompleter {
             String subCommand = args[0].toLowerCase();
             
             if ("set".equals(subCommand) && sender.hasPermission("killeffects.set.others")) {
-                // Player names for setting others' effects
                 return plugin.getServer().getOnlinePlayers().stream()
                         .map(Player::getName)
                         .collect(Collectors.toList());
             } else if ("favorite".equals(subCommand)) {
-                // Effect names for favorites
                 for (EffectType effect : EffectType.values()) {
                     completions.add(effect.getConfigKey());
                 }
             }
         } else if (args.length == 4 && "set".equals(args[0].toLowerCase()) && sender.hasPermission("killeffects.set.others")) {
-            // Effect names when setting for other players
             completions.add("none");
             for (EffectType effect : EffectType.values()) {
                 completions.add(effect.getConfigKey());
             }
         }
-        
-        // Filter completions based on what the player has typed
         String partial = args[args.length - 1].toLowerCase();
         return completions.stream()
                 .filter(completion -> completion.toLowerCase().startsWith(partial))
