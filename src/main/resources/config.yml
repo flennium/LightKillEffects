@@ -100,7 +100,7 @@ feedback-cooldowns:
 # Performance Settings
 performance:
   # Maximum particle count per effect
-  max-particles-per-effect: 350
+  max-particles-per-effect: 600
 
   # Particle render distance (blocks)
   particle-render-distance: 10
@@ -154,7 +154,7 @@ gui:
     z: 0
     
     # Maximum distance player can move from preview location (blocks)
-    max-distance: 10
+    max-distance: 10 # We don't need this anymore i think
 
   menus:
     border:
