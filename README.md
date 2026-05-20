@@ -4,9 +4,14 @@ LightKillEffects is a lightweight Paper plugin that adds configurable visual eff
 
 Built for servers that want polished kill feedback without heavy dependencies or noisy setup.
 
+## Showcase
+
+- [Showcase Video 1](./showcase1.mp4)
+- [Showcase Video 2](./showcase2.mp4)
+
 ## Features
 
-- 20 built-in kill effects
+- 30 built-in kill effects
 - Inventory GUI with categories and favorites
 - Per-effect permissions
 - Safer preview arena with cooldowns, auto-exit, and command controls
