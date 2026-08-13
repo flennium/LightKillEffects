@@ -24,8 +24,8 @@ Built for servers that want polished kill feedback without heavy dependencies or
 ## Requirements
 
 - Paper or compatible Bukkit server
-- Minecraft 1.20.4+
-- Java 17+
+- Minecraft 1.21 through 26.2
+- Java 21+ (Java 25 for Minecraft 26.2)
 
 ## Installation
 

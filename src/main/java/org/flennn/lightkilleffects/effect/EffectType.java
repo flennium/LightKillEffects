@@ -15,13 +15,13 @@ public enum EffectType {
             Particle.SNOWFLAKE, Sound.BLOCK_GLASS_BREAK, 70, 6, 4),
     
     NEON_RAVE("neon_rave", "Neon Rave", Material.REDSTONE_LAMP, 
-            Particle.REDSTONE, Sound.BLOCK_NOTE_BLOCK_BASS, 100, 10, 6),
+            Particle.DUST, Sound.BLOCK_NOTE_BLOCK_BASS, 100, 10, 6),
     
     STARFALL_CASCADE("starfall_cascade", "Starfall Cascade", Material.NETHER_STAR, 
             Particle.END_ROD, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 120, 7, 8),
     
     PRISMATIC_SHATTER("prismatic_shatter", "Prismatic Shatter", Material.GLASS, 
-            Particle.FIREWORKS_SPARK, Sound.BLOCK_GLASS_BREAK, 60, 4, 3),
+            Particle.FIREWORK, Sound.BLOCK_GLASS_BREAK, 60, 4, 3),
     
     VOID_CONSUMPTION("void_consumption", "Void Consumption", Material.OBSIDIAN, 
             Particle.PORTAL, Sound.ENTITY_WITHER_SPAWN, 90, 6, 5),
@@ -36,7 +36,7 @@ public enum EffectType {
             Particle.ELECTRIC_SPARK, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 80, 9, 5),
     
     CRYSTAL_GARDEN("crystal_garden", "Crystal Garden", Material.EMERALD_BLOCK, 
-            Particle.VILLAGER_HAPPY, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 140, 5, 6),
+            Particle.HAPPY_VILLAGER, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 140, 5, 6),
     
     SPECTRAL_HAUNT("spectral_haunt", "Spectral Haunt", Material.SKELETON_SKULL, 
             Particle.SOUL, Sound.ENTITY_GHAST_AMBIENT, 100, 4, 3),
@@ -51,13 +51,13 @@ public enum EffectType {
             Particle.SPORE_BLOSSOM_AIR, Sound.BLOCK_GRASS_BREAK, 90, 4, 4),
     
     TIME_FRACTURE("time_fracture", "Time Fracture", Material.CLOCK, 
-            Particle.ENCHANTMENT_TABLE, Sound.ENTITY_ENDERMAN_TELEPORT, 80, 6, 4),
+            Particle.ENCHANT, Sound.ENTITY_ENDERMAN_TELEPORT, 80, 6, 4),
     
     DIVINE_ASCENSION("divine_ascension", "Divine Ascension", Material.GOLDEN_APPLE, 
-            Particle.TOTEM, Sound.ENTITY_PLAYER_LEVELUP, 130, 7, 5),
+            Particle.TOTEM_OF_UNDYING, Sound.ENTITY_PLAYER_LEVELUP, 130, 7, 5),
     
     TOXIC_MELTDOWN("toxic_meltdown", "Toxic Meltdown", Material.SLIME_BALL, 
-            Particle.SLIME, Sound.ENTITY_SLIME_SQUISH, 110, 6, 5),
+            Particle.ITEM_SLIME, Sound.ENTITY_SLIME_SQUISH, 110, 6, 5),
     
     QUANTUM_COLLAPSE("quantum_collapse", "Quantum Collapse", Material.ENDER_PEARL, 
             Particle.REVERSE_PORTAL, Sound.ENTITY_ENDERMAN_DEATH, 90, 5, 4),
@@ -75,13 +75,13 @@ public enum EffectType {
             Particle.END_ROD, Sound.BLOCK_GLASS_BREAK, 90, 6, 4),
 
     ROYAL_EXECUTION("royal_execution", "Royal Execution", Material.GOLDEN_HELMET,
-            Particle.TOTEM, Sound.ENTITY_PLAYER_LEVELUP, 110, 6, 4),
+            Particle.TOTEM_OF_UNDYING, Sound.ENTITY_PLAYER_LEVELUP, 110, 6, 4),
 
     SAKURA_COLLAPSE("sakura_collapse", "Sakura Collapse", Material.PINK_PETALS,
-            Particle.VILLAGER_HAPPY, Sound.BLOCK_GRASS_BREAK, 110, 6, 5),
+            Particle.HAPPY_VILLAGER, Sound.BLOCK_GRASS_BREAK, 110, 6, 5),
 
     ALCHEMY_FAILURE("alchemy_failure", "Alchemy Failure", Material.BREWING_STAND,
-            Particle.SPELL_WITCH, Sound.BLOCK_BREWING_STAND_BREW, 120, 7, 5),
+            Particle.WITCH, Sound.BLOCK_BREWING_STAND_BREW, 120, 7, 5),
 
     RUNIC_FORGE("runic_forge", "Runic Forge", Material.ANVIL,
             Particle.FLAME, Sound.BLOCK_ANVIL_PLACE, 95, 7, 4),
@@ -90,10 +90,10 @@ public enum EffectType {
             Particle.END_ROD, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 130, 6, 5),
 
     ASTRAL_VERDICT("astral_verdict", "Astral Verdict", Material.END_CRYSTAL,
-            Particle.ENCHANTMENT_TABLE, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 130, 8, 6),
+            Particle.ENCHANT, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 130, 8, 6),
 
     TIME_SNAP("time_snap", "Time Snap", Material.CLOCK,
-            Particle.ENCHANTMENT_TABLE, Sound.ENTITY_ENDERMAN_TELEPORT, 100, 6, 4);
+            Particle.ENCHANT, Sound.ENTITY_ENDERMAN_TELEPORT, 100, 6, 4);
     
     private final String configKey;
     private final String displayName;

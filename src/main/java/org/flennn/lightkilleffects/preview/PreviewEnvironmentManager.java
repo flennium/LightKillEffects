@@ -154,7 +154,7 @@ public class PreviewEnvironmentManager {
         try {
             return EntityType.valueOf("OAK_BOAT");
         } catch (IllegalArgumentException ignored) {
-            return EntityType.BOAT;
+            return EntityType.OAK_BOAT;
         }
     }
 

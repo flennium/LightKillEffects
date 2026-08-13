@@ -131,7 +131,7 @@ public class KillEffectManager {
                                 Math.sin(angle) * radius
                         );
                         spawnParticles(viewers, boltLoc, Particle.ELECTRIC_SPARK, 20, 0.1, 2, 0.1, 0.1);
-                        spawnParticles(viewers, boltLoc, Particle.FIREWORKS_SPARK, 10, 0.2, 3, 0.2, 0.0);
+                        spawnParticles(viewers, boltLoc, Particle.FIREWORK, 10, 0.2, 3, 0.2, 0.0);
                         if (ticks % 24 == 0 && random.nextBoolean()) {
                             center.getWorld().strikeLightningEffect(boltLoc);
                         }
@@ -160,7 +160,7 @@ public class KillEffectManager {
                 double radius = 0.5 + (progress * 4);
                 spawnParticles(viewers, center, Particle.FLAME, 
                         (int) (30 * (1 - progress)), 0.5, 0.5, 0.5, 0.05);
-                spawnParticles(viewers, center, Particle.FIREWORKS_SPARK, 
+                spawnParticles(viewers, center, Particle.FIREWORK,
                         (int) (20 * (1 - progress)), 0.3, 0.3, 0.3, 0.1);
                 for (int i = 0; i < (performanceMode ? 8 : 16); i++) {
                     double angle = (2 * Math.PI * i) / (performanceMode ? 8 : 16);
@@ -199,7 +199,7 @@ public class KillEffectManager {
                                 random.nextDouble() * 3,
                                 (random.nextDouble() - 0.5) * 8
                         );
-                        spawnParticles(viewers, shatterLoc, Particle.BLOCK_CRACK, 3, 0.1, 0.1, 0.1, 0.1, 
+                        spawnParticles(viewers, shatterLoc, Particle.BLOCK, 3, 0.1, 0.1, 0.1, 0.1,
                                 Material.PACKED_ICE.createBlockData());
                     }
                     cancel();
@@ -217,7 +217,7 @@ public class KillEffectManager {
                             height,
                             Math.sin(angle) * radius
                     );
-                    spawnParticles(viewers, spiralLoc, Particle.REDSTONE, 5, 0.1, 0.1, 0.1, 0.0,
+                    spawnParticles(viewers, spiralLoc, Particle.DUST, 5, 0.1, 0.1, 0.1, 0.0,
                             new Particle.DustOptions(Color.fromRGB(173, 216, 230), 1.5f));
                     spawnParticles(viewers, spiralLoc, Particle.SNOWFLAKE, 8, 0.2, 0.2, 0.2, 0.05);
                 }
@@ -264,7 +264,7 @@ public class KillEffectManager {
                         double z = Math.sin(phi) * Math.sin(theta) * 1.5;
                         
                         Location ballLoc = center.clone().add(x, y + 2, z);
-                        spawnParticles(viewers, ballLoc, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0,
+                        spawnParticles(viewers, ballLoc, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0,
                                 new Particle.DustOptions(currentColor, 1.0f));
                     }
                     for (int beam = 0; beam < (performanceMode ? 4 : 8); beam++) {
@@ -278,7 +278,7 @@ public class KillEffectManager {
                             );
                             
                             Color beamColor = neonColors[(beam + ticks / 5) % neonColors.length];
-                            spawnParticles(viewers, beamLoc, Particle.REDSTONE, 3, 0.1, 0.0, 0.1, 0.0,
+                            spawnParticles(viewers, beamLoc, Particle.DUST, 3, 0.1, 0.0, 0.1, 0.0,
                                     new Particle.DustOptions(beamColor, 2.0f));
                         }
                     }
@@ -322,12 +322,12 @@ public class KillEffectManager {
                     star.update();
                     
                     if (star.location.getY() < center.getY() - 2) {
-                        spawnParticles(viewers, star.location, Particle.FIREWORKS_SPARK, 15, 0.3, 0.1, 0.3, 0.1);
+                        spawnParticles(viewers, star.location, Particle.FIREWORK, 15, 0.3, 0.1, 0.3, 0.1);
                         spawnParticles(viewers, star.location, Particle.END_ROD, 8, 0.2, 0.2, 0.2, 0.05);
                         iterator.remove();
                     } else {
                         spawnParticles(viewers, star.location, Particle.END_ROD, 3, 0.1, 0.1, 0.1, 0.02);
-                        spawnParticles(viewers, star.location, Particle.FIREWORKS_SPARK, 2, 0.05, 0.05, 0.05, 0.01);
+                        spawnParticles(viewers, star.location, Particle.FIREWORK, 2, 0.05, 0.05, 0.05, 0.01);
                         Location trailLoc = star.location.clone().subtract(star.velocity.clone().multiply(3));
                         spawnParticles(viewers, trailLoc, Particle.END_ROD, 1, 0.05, 0.05, 0.05, 0.0);
                     }
@@ -365,9 +365,9 @@ public class KillEffectManager {
                     Color[] rainbowColors = {Color.RED, Color.ORANGE, Color.YELLOW, Color.LIME, Color.GREEN, Color.AQUA, Color.BLUE, Color.PURPLE};
                     Color rainbowColor = rainbowColors[(ticks + i * 10) % rainbowColors.length];
                     
-                    spawnParticles(viewers, shardLoc, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0,
+                    spawnParticles(viewers, shardLoc, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0,
                             new Particle.DustOptions(rainbowColor, 1.0f));
-                    spawnParticles(viewers, shardLoc, Particle.FIREWORKS_SPARK, 2, 0.1, 0.1, 0.1, 0.05);
+                    spawnParticles(viewers, shardLoc, Particle.FIREWORK, 2, 0.1, 0.1, 0.1, 0.05);
                 }
                 if (ticks < 40) {
                     spawnParticles(viewers, center.clone().add(0, 1, 0), Particle.END_ROD, 10, 0.2, 1, 0.2, 0.1);
@@ -598,9 +598,9 @@ public class KillEffectManager {
         void render(List<Player> viewers) {
             for (double h = 0; h <= currentHeight; h += 0.2) {
                 Location crystalLoc = location.clone().add(0, h, 0);
-                spawnParticles(viewers, crystalLoc, Particle.VILLAGER_HAPPY, 2, 0.1, 0.05, 0.1, 0.01);
+                spawnParticles(viewers, crystalLoc, Particle.HAPPY_VILLAGER, 2, 0.1, 0.05, 0.1, 0.01);
                 if (h > currentHeight * 0.8) {
-                    spawnParticles(viewers, crystalLoc, Particle.ENCHANTMENT_TABLE, 1, 0.05, 0.05, 0.05, 0.005);
+                    spawnParticles(viewers, crystalLoc, Particle.ENCHANT, 1, 0.05, 0.05, 0.05, 0.005);
                 }
             }
         }
@@ -648,9 +648,9 @@ public class KillEffectManager {
                         Math.sin(angle) * d
                 );
                 
-                spawnParticles(viewers, fracLoc, Particle.SPELL_WITCH, 1, 0.02, 0.02, 0.02, 0.01);
+                spawnParticles(viewers, fracLoc, Particle.WITCH, 1, 0.02, 0.02, 0.02, 0.01);
                 if (d % 0.5 < 0.2) {
-                    spawnParticles(viewers, fracLoc, Particle.ENCHANTMENT_TABLE, 1, 0.01, 0.01, 0.01, 0.005);
+                    spawnParticles(viewers, fracLoc, Particle.ENCHANT, 1, 0.01, 0.01, 0.01, 0.005);
                 }
             }
         }
@@ -769,7 +769,7 @@ public class KillEffectManager {
 
                 if (ticks > 45 && ticks % 10 == 0) {
                     spawnParticles(viewers, center.clone().add(0, 1.2, 0), Particle.ELECTRIC_SPARK, 14, 0.8, 1.0, 0.8, 0.08);
-                    spawnParticles(viewers, center.clone().add(0, 1.2, 0), Particle.FIREWORKS_SPARK, 8, 0.4, 0.6, 0.4, 0.04);
+                    spawnParticles(viewers, center.clone().add(0, 1.2, 0), Particle.FIREWORK, 8, 0.4, 0.6, 0.4, 0.04);
                 }
 
                 ticks++;
@@ -815,7 +815,7 @@ public class KillEffectManager {
                             0.7,
                             Math.sin(angle - 0.35) * (baseRadius + 0.15)
                     );
-                    spawnParticles(viewers, trail, Particle.ENCHANTMENT_TABLE, 2, 0.04, 0.04, 0.04, 0.01);
+                    spawnParticles(viewers, trail, Particle.ENCHANT, 2, 0.04, 0.04, 0.04, 0.01);
                 }
 
                 if (ticks % 18 == 0) {
@@ -866,7 +866,7 @@ public class KillEffectManager {
                                         Math.sin(angle + Math.PI / 2) * width
                                 );
                                 Color color = glassColors[(panel + ((int) Math.round((y + 0.8) * 3))) % glassColors.length];
-                                spawnParticles(viewers, piece, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(color, 1.0f));
+                                spawnParticles(viewers, piece, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(color, 1.0f));
                             }
                         }
                     }
@@ -887,7 +887,7 @@ public class KillEffectManager {
                             Color color = glassColors[i % glassColors.length];
                             shards.add(new MirrorShard(center.clone().add(0, 1.1, 0), velocity, color));
                         }
-                        spawnParticles(viewers, center.clone().add(0, 1.1, 0), Particle.FIREWORKS_SPARK, 14, 0.5, 0.6, 0.5, 0.05);
+                        spawnParticles(viewers, center.clone().add(0, 1.1, 0), Particle.FIREWORK, 14, 0.5, 0.6, 0.5, 0.05);
                     }
                 } else {
                     Iterator<MirrorShard> iterator = shards.iterator();
@@ -899,7 +899,7 @@ public class KillEffectManager {
                             continue;
                         }
 
-                        spawnParticles(viewers, shard.location, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(shard.color, 1.05f));
+                        spawnParticles(viewers, shard.location, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(shard.color, 1.05f));
                         if (shard.age % 4 == 0) {
                             spawnParticles(viewers, shard.location, Particle.END_ROD, 1, 0.02, 0.02, 0.02, 0.0);
                         }
@@ -921,7 +921,7 @@ public class KillEffectManager {
             @Override
             public void run() {
                 if (ticks >= maxTicks) {
-                    spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.TOTEM, 12, 0.5, 0.8, 0.5, 0.04);
+                    spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.TOTEM_OF_UNDYING, 12, 0.5, 0.8, 0.5, 0.04);
                     cancel();
                     return;
                 }
@@ -934,14 +934,14 @@ public class KillEffectManager {
                     double angle = (2 * Math.PI * point) / 20;
                     Location floor = center.clone().add(Math.cos(angle) * 2.4, 0.1, Math.sin(angle) * 2.4);
                     Color floorColor = point % 2 == 0 ? gold : ruby;
-                    spawnParticles(viewers, floor, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(floorColor, 1.15f));
+                    spawnParticles(viewers, floor, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(floorColor, 1.15f));
                 }
 
                 double crownY = 3.1 - (progress * 1.3);
                 for (int point = 0; point < 16; point++) {
                     double angle = (2 * Math.PI * point) / 16;
                     Location band = center.clone().add(Math.cos(angle) * 1.05, crownY, Math.sin(angle) * 1.05);
-                    spawnParticles(viewers, band, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(gold, 1.3f));
+                    spawnParticles(viewers, band, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(gold, 1.3f));
                 }
 
                 for (int tip = 0; tip < 5; tip++) {
@@ -953,16 +953,16 @@ public class KillEffectManager {
                                 crownY + h,
                                 Math.sin(angle) * 1.05 * taper
                         );
-                        spawnParticles(viewers, spike, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(gold, 1.15f));
+                        spawnParticles(viewers, spike, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(gold, 1.15f));
                     }
 
                     Location jewel = center.clone().add(Math.cos(angle) * 0.62, crownY + 0.25, Math.sin(angle) * 0.62);
-                    spawnParticles(viewers, jewel, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(ruby, 1.0f));
+                    spawnParticles(viewers, jewel, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(ruby, 1.0f));
                 }
 
                 if (ticks > 55 && ticks % 10 == 0) {
-                    spawnParticles(viewers, center.clone().add(0, 1.3, 0), Particle.TOTEM, 8, 0.2, 0.8, 0.2, 0.03);
-                    spawnParticles(viewers, center.clone().add(0, 1.3, 0), Particle.FIREWORKS_SPARK, 6, 0.4, 0.6, 0.4, 0.04);
+                    spawnParticles(viewers, center.clone().add(0, 1.3, 0), Particle.TOTEM_OF_UNDYING, 8, 0.2, 0.8, 0.2, 0.03);
+                    spawnParticles(viewers, center.clone().add(0, 1.3, 0), Particle.FIREWORK, 6, 0.4, 0.6, 0.4, 0.04);
                 }
 
                 ticks++;
@@ -1017,14 +1017,14 @@ public class KillEffectManager {
                             petal.height + Math.sin((ticks * 0.08) + petal.angle) * 0.2,
                             Math.sin(petal.angle) * petal.radius
                     );
-                    spawnParticles(viewers, loc, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(petal.color, 0.95f));
+                    spawnParticles(viewers, loc, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(petal.color, 0.95f));
                     if (petal.age % 9 == 0) {
-                        spawnParticles(viewers, loc, Particle.FIREWORKS_SPARK, 1, 0.03, 0.03, 0.03, 0.0);
+                        spawnParticles(viewers, loc, Particle.FIREWORK, 1, 0.03, 0.03, 0.03, 0.0);
                     }
                 }
 
                 if (collapsing && ticks % 8 == 0) {
-                    spawnParticles(viewers, center.clone().add(0, 0.9, 0), Particle.REDSTONE, 8, 0.25, 0.45, 0.25, 0.01,
+                    spawnParticles(viewers, center.clone().add(0, 0.9, 0), Particle.DUST, 8, 0.25, 0.45, 0.25, 0.01,
                             dust(Color.fromRGB(255, 245, 250), 1.1f));
                 }
 
@@ -1049,8 +1049,8 @@ public class KillEffectManager {
             @Override
             public void run() {
                 if (ticks >= maxTicks) {
-                    spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.SMOKE_LARGE, 10, 0.5, 0.8, 0.5, 0.03);
-                    spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.FIREWORKS_SPARK, 10, 0.4, 0.7, 0.4, 0.05);
+                    spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.LARGE_SMOKE, 10, 0.5, 0.8, 0.5, 0.03);
+                    spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.FIREWORK, 10, 0.4, 0.7, 0.4, 0.05);
                     cancel();
                     return;
                 }
@@ -1064,16 +1064,16 @@ public class KillEffectManager {
                                 h,
                                 Math.sin(angle + h) * (swirlRadius + (h * 0.08))
                         );
-                        spawnParticles(viewers, mote, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(colors[orb], 1.0f));
+                        spawnParticles(viewers, mote, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(colors[orb], 1.0f));
                     }
                 }
 
-                spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.SPELL_WITCH, 4, 0.2, 0.8, 0.2, 0.02);
+                spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.WITCH, 4, 0.2, 0.8, 0.2, 0.02);
                 if (ticks % 7 == 0) {
-                    spawnParticles(viewers, center.clone().add(0, 0.6, 0), Particle.SMOKE_NORMAL, 5, 0.3, 0.5, 0.3, 0.02);
+                    spawnParticles(viewers, center.clone().add(0, 0.6, 0), Particle.SMOKE, 5, 0.3, 0.5, 0.3, 0.02);
                 }
                 if (ticks % 16 == 0) {
-                    spawnParticles(viewers, center.clone().add(0, 1.2, 0), Particle.ITEM_CRACK, 2, 0.15, 0.2, 0.15, 0.01,
+                    spawnParticles(viewers, center.clone().add(0, 1.2, 0), Particle.ITEM, 2, 0.15, 0.2, 0.15, 0.01,
                             new ItemStack(Material.GLASS_BOTTLE));
                 }
 
@@ -1102,14 +1102,14 @@ public class KillEffectManager {
                 for (int point = 0; point < 18; point++) {
                     double angle = (2 * Math.PI * point) / 18 + (ticks * 0.02);
                     Location ring = center.clone().add(Math.cos(angle) * 2.2, 0.08, Math.sin(angle) * 2.2);
-                    spawnParticles(viewers, ring, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(ember, 1.1f));
+                    spawnParticles(viewers, ring, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(ember, 1.1f));
                 }
 
                 for (int rune = 0; rune < 4; rune++) {
                     double angle = (Math.PI / 2 * rune) + (ticks * 0.03);
                     for (double d = 0.2; d <= 1.1; d += 0.2) {
                         Location line = center.clone().add(Math.cos(angle) * d, 0.1, Math.sin(angle) * d);
-                        spawnParticles(viewers, line, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(gold, 1.0f));
+                        spawnParticles(viewers, line, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(gold, 1.0f));
                     }
                 }
 
@@ -1126,8 +1126,8 @@ public class KillEffectManager {
                 }
 
                 if (ticks > 50 && ticks % 12 == 0) {
-                    spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.SMOKE_LARGE, 6, 0.3, 0.4, 0.3, 0.03);
-                    spawnParticles(viewers, center.clone().add(0, 1.2, 0), Particle.FIREWORKS_SPARK, 6, 0.35, 0.5, 0.35, 0.04);
+                    spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.LARGE_SMOKE, 6, 0.3, 0.4, 0.3, 0.03);
+                    spawnParticles(viewers, center.clone().add(0, 1.2, 0), Particle.FIREWORK, 6, 0.35, 0.5, 0.35, 0.04);
                 }
 
                 ticks++;
@@ -1168,7 +1168,7 @@ public class KillEffectManager {
                                 0.5 + lift,
                                 Math.sin(angle) * step
                         );
-                        spawnParticles(viewers, loc, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(color, 1.0f));
+                        spawnParticles(viewers, loc, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(color, 1.0f));
                     }
 
                     if (ticks % 10 == 0) {
@@ -1217,7 +1217,7 @@ public class KillEffectManager {
                 for (int point = 0; point < 18; point++) {
                     double angle = (2 * Math.PI * point) / 18;
                     Location outer = center.clone().add(Math.cos(angle) * 2.8, 0.08, Math.sin(angle) * 2.8);
-                    spawnParticles(viewers, outer, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(arcane, 1.0f));
+                    spawnParticles(viewers, outer, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(arcane, 1.0f));
                 }
 
                 for (int edge = 0; edge < 3; edge++) {
@@ -1228,7 +1228,7 @@ public class KillEffectManager {
                     Vector between = b.toVector().subtract(a.toVector());
                     for (int segment = 0; segment <= 7; segment++) {
                         Location line = a.clone().add(between.clone().multiply(segment / 7.0));
-                        spawnParticles(viewers, line, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, dust(gold, 0.95f));
+                        spawnParticles(viewers, line, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, dust(gold, 0.95f));
                     }
                 }
 
@@ -1243,7 +1243,7 @@ public class KillEffectManager {
                         Vector between = end.toVector().subtract(start.toVector());
                         for (int segment = 0; segment <= 5; segment++) {
                             Location link = start.clone().add(between.clone().multiply(segment / 5.0));
-                            spawnParticles(viewers, link, Particle.ENCHANTMENT_TABLE, 1, 0.02, 0.02, 0.02, 0.0);
+                            spawnParticles(viewers, link, Particle.ENCHANT, 1, 0.02, 0.02, 0.02, 0.0);
                         }
                     }
                 }
@@ -1253,13 +1253,13 @@ public class KillEffectManager {
                     if (beamY > 0.5) {
                         Location beam = center.clone().add(0, beamY, 0);
                         spawnParticles(viewers, beam, Particle.END_ROD, 4, 0.08, 0.12, 0.08, 0.01);
-                        spawnParticles(viewers, beam, Particle.REDSTONE, 2, 0.0, 0.0, 0.0, 0.0, dust(gold, 1.1f));
+                        spawnParticles(viewers, beam, Particle.DUST, 2, 0.0, 0.0, 0.0, 0.0, dust(gold, 1.1f));
                     }
                 }
 
                 if (ticks == 104) {
                     spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.FLASH, 4, 0.35, 0.6, 0.35, 0.03);
-                    spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.FIREWORKS_SPARK, 20, 0.8, 1.2, 0.8, 0.08);
+                    spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.FIREWORK, 20, 0.8, 1.2, 0.8, 0.08);
                 }
 
                 ticks++;
@@ -1295,14 +1295,14 @@ public class KillEffectManager {
                                     y,
                                     Math.sin(angle) * radius
                             );
-                            spawnParticles(viewers, afterImage, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0,
+                            spawnParticles(viewers, afterImage, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0,
                                     dust(blend(start, end, progress), 0.95f));
                         }
                     }
                 } else if (ticks < 48) {
                     if (ticks % 4 == 0) {
                         spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.REVERSE_PORTAL, 8, 0.2, 0.5, 0.2, 0.02);
-                        spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.ENCHANTMENT_TABLE, 6, 0.3, 0.6, 0.3, 0.02);
+                        spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.ENCHANT, 6, 0.3, 0.6, 0.3, 0.02);
                     }
                 } else if (ticks == 48) {
                     spawnParticles(viewers, center.clone().add(0, 1.0, 0), Particle.FLASH, 5, 0.4, 0.4, 0.4, 0.04);
@@ -1318,7 +1318,7 @@ public class KillEffectManager {
                         );
                         spawnParticles(viewers, ripple, Particle.END_ROD, 1, 0.02, 0.02, 0.02, 0.0);
                         if (ticks % 6 == 0) {
-                            spawnParticles(viewers, ripple, Particle.ENCHANTMENT_TABLE, 1, 0.02, 0.02, 0.02, 0.0);
+                            spawnParticles(viewers, ripple, Particle.ENCHANT, 1, 0.02, 0.02, 0.02, 0.0);
                         }
                     }
                 }
@@ -1353,10 +1353,10 @@ public class KillEffectManager {
                             Math.sin(angle) * radius
                     );
                     spawnParticles(viewers, spiralLoc, Particle.PORTAL, 8, 0.2, 0.2, 0.2, 0.1);
-                    spawnParticles(viewers, spiralLoc, Particle.SPELL_WITCH, 3, 0.1, 0.1, 0.1, 0.05);
+                    spawnParticles(viewers, spiralLoc, Particle.WITCH, 3, 0.1, 0.1, 0.1, 0.05);
                 }
                 if (progress > 0.3) {
-                    spawnParticles(viewers, center.clone().add(0, 1, 0), Particle.SMOKE_LARGE, 
+                    spawnParticles(viewers, center.clone().add(0, 1, 0), Particle.LARGE_SMOKE,
                             (int) (15 * progress), 0.3, 0.5, 0.3, 0.02);
                     spawnParticles(viewers, center.clone().add(0, 1, 0), Particle.PORTAL, 
                             (int) (20 * progress), 0.2, 0.3, 0.2, 0.1);
@@ -1397,14 +1397,14 @@ public class KillEffectManager {
                         spawnParticles(viewers, wingLoc, Particle.FLAME, 3, 0.1, 0.1, 0.1, 0.02);
                         spawnParticles(viewers, wingLoc, Particle.LAVA, 1, 0.05, 0.05, 0.05, 0.0);
                         if (wingProgress > 0.7) {
-                            spawnParticles(viewers, wingLoc, Particle.FIREWORKS_SPARK, 2, 0.1, 0.1, 0.1, 0.05);
+                            spawnParticles(viewers, wingLoc, Particle.FIREWORK, 2, 0.1, 0.1, 0.1, 0.05);
                         }
                     }
                 }
                 if (progress > 0.4) {
                     Location bodyLoc = center.clone().add(0, progress * 4, 0);
                     spawnParticles(viewers, bodyLoc, Particle.FLAME, 10, 0.3, 0.3, 0.3, 0.05);
-                    spawnParticles(viewers, bodyLoc, Particle.SMOKE_LARGE, 5, 0.2, 0.2, 0.2, 0.02);
+                    spawnParticles(viewers, bodyLoc, Particle.LARGE_SMOKE, 5, 0.2, 0.2, 0.2, 0.02);
                 }
                 
                 ticks++;
@@ -1446,7 +1446,7 @@ public class KillEffectManager {
                 }
                 Location centerPortal = center.clone().add(0, 2, 0);
                 spawnParticles(viewers, centerPortal, Particle.PORTAL, 15, 0.5, 0.1, 0.5, 0.1);
-                spawnParticles(viewers, centerPortal, Particle.ENCHANTMENT_TABLE, 8, 0.3, 0.3, 0.3, 0.05);
+                spawnParticles(viewers, centerPortal, Particle.ENCHANT, 8, 0.3, 0.3, 0.3, 0.05);
                 
                 ticks++;
             }
@@ -1478,7 +1478,7 @@ public class KillEffectManager {
                     
                     spawnParticles(viewers, sparkLoc, Particle.ELECTRIC_SPARK, 3, 0.1, 0.1, 0.1, 0.05);
                     if (random.nextBoolean()) {
-                        spawnParticles(viewers, sparkLoc, Particle.FIREWORKS_SPARK, 1, 0.02, 0.02, 0.02, 0.02);
+                        spawnParticles(viewers, sparkLoc, Particle.FIREWORK, 1, 0.02, 0.02, 0.02, 0.02);
                     }
                 }
                 if (ticks % 5 == 0) {
@@ -1559,7 +1559,7 @@ public class KillEffectManager {
                     Color color = colors[laser % colors.length];
                     for (double d = 0.5; d <= 6; d += 0.3) {
                         Location beamLoc = center.clone().add(Math.cos(angle) * d, 1.5, Math.sin(angle) * d);
-                        spawnParticles(viewers, beamLoc, Particle.REDSTONE, 1, 0.0, 0.0, 0.0, 0.0, new Particle.DustOptions(color, 1.5f));
+                        spawnParticles(viewers, beamLoc, Particle.DUST, 1, 0.0, 0.0, 0.0, 0.0, new Particle.DustOptions(color, 1.5f));
                     }
                 }
                 ticks++;
@@ -1579,10 +1579,10 @@ public class KillEffectManager {
                 if (!impacted && ticks < 30) {
                     Location meteorLoc = center.clone().add(0, 10 - (ticks * 0.4), 0);
                     spawnParticles(viewers, meteorLoc, Particle.FLAME, 10, 0.3, 0.3, 0.3, 0.1);
-                    spawnParticles(viewers, meteorLoc, Particle.SMOKE_LARGE, 5, 0.5, 0.5, 0.5, 0.05);
+                    spawnParticles(viewers, meteorLoc, Particle.LARGE_SMOKE, 5, 0.5, 0.5, 0.5, 0.05);
                 } else if (!impacted) {
                     impacted = true;
-                    spawnParticles(viewers, center, Particle.EXPLOSION_LARGE, 5, 1, 0.5, 1, 0.0);
+                    spawnParticles(viewers, center, Particle.EXPLOSION, 5, 1, 0.5, 1, 0.0);
                     spawnParticles(viewers, center, Particle.FLAME, 30, 2, 0.5, 2, 0.2);
                 }
                 ticks++;
@@ -1625,13 +1625,13 @@ public class KillEffectManager {
                                     random.nextDouble() * 0.2,
                                     (random.nextDouble() - 0.5) * 0.3
                             );
-                            spawnParticles(viewers, bloomLoc, Particle.VILLAGER_HAPPY, 3, 0.1, 0.1, 0.1, 0.02);
+                            spawnParticles(viewers, bloomLoc, Particle.HAPPY_VILLAGER, 3, 0.1, 0.1, 0.1, 0.02);
                         }
                         iterator.remove();
                     } else {
                         spawnParticles(viewers, spore.location, Particle.SPORE_BLOSSOM_AIR, 2, 0.05, 0.05, 0.05, 0.01);
                         if (spore.age % 10 == 0) {
-                            spawnParticles(viewers, spore.location, Particle.VILLAGER_HAPPY, 1, 0.02, 0.02, 0.02, 0.01);
+                            spawnParticles(viewers, spore.location, Particle.HAPPY_VILLAGER, 1, 0.02, 0.02, 0.02, 0.01);
                         }
                     }
                 }
@@ -1646,8 +1646,8 @@ public class KillEffectManager {
                                 Math.sin(angle) * distance
                         );
                         
-                        spawnParticles(viewers, groundBloom, Particle.VILLAGER_HAPPY, 5, 0.3, 0.1, 0.3, 0.02);
-                        spawnParticles(viewers, groundBloom, Particle.ENCHANTMENT_TABLE, 2, 0.1, 0.1, 0.1, 0.01);
+                        spawnParticles(viewers, groundBloom, Particle.HAPPY_VILLAGER, 5, 0.3, 0.1, 0.3, 0.02);
+                        spawnParticles(viewers, groundBloom, Particle.ENCHANT, 2, 0.1, 0.1, 0.1, 0.01);
                     }
                 }
                 
@@ -1686,7 +1686,7 @@ public class KillEffectManager {
                 }
                 if (ticks % 5 == 0) {
                     Location timeCenter = center.clone().add(0, 2, 0);
-                    spawnParticles(viewers, timeCenter, Particle.ENCHANTMENT_TABLE, 15, 1, 1, 1, 0.1);
+                    spawnParticles(viewers, timeCenter, Particle.ENCHANT, 15, 1, 1, 1, 0.1);
                     spawnParticles(viewers, timeCenter, Particle.PORTAL, 8, 0.5, 0.5, 0.5, 0.05);
                 }
                 if (ticks % 8 == 0) {
@@ -1701,7 +1701,7 @@ public class KillEffectManager {
                                     Math.sin(angle) * rippleRadius
                             );
                             
-                            spawnParticles(viewers, rippleLoc, Particle.SPELL_WITCH, 2, 0.1, 0.1, 0.1, 0.02);
+                            spawnParticles(viewers, rippleLoc, Particle.WITCH, 2, 0.1, 0.1, 0.1, 0.02);
                         }
                     }
                 }
@@ -1725,8 +1725,8 @@ public class KillEffectManager {
                     for (double h = 0; h <= progress * 6; h += 0.3) {
                         double angle = (h * 0.8) + (helix * Math.PI);
                         Location helixLoc = center.clone().add(Math.cos(angle) * 1.5, h, Math.sin(angle) * 1.5);
-                        spawnParticles(viewers, helixLoc, Particle.TOTEM, 2, 0.05, 0.05, 0.05, 0.02);
-                        spawnParticles(viewers, helixLoc, Particle.FIREWORKS_SPARK, 1, 0.02, 0.02, 0.02, 0.01);
+                        spawnParticles(viewers, helixLoc, Particle.TOTEM_OF_UNDYING, 2, 0.05, 0.05, 0.05, 0.02);
+                        spawnParticles(viewers, helixLoc, Particle.FIREWORK, 1, 0.02, 0.02, 0.02, 0.01);
                     }
                 }
                 ticks++;
@@ -1770,13 +1770,13 @@ public class KillEffectManager {
                                     random.nextDouble() * 0.5,
                                     (random.nextDouble() - 0.5) * 0.5
                             );
-                            spawnParticles(viewers, popLoc, Particle.SLIME, 2, 0.1, 0.1, 0.1, 0.02);
+                            spawnParticles(viewers, popLoc, Particle.ITEM_SLIME, 2, 0.1, 0.1, 0.1, 0.02);
                         }
                         iterator.remove();
                     } else {
-                        spawnParticles(viewers, bubble.location, Particle.SLIME, 3, 0.1, 0.1, 0.1, 0.01);
+                        spawnParticles(viewers, bubble.location, Particle.ITEM_SLIME, 3, 0.1, 0.1, 0.1, 0.01);
                         if (bubble.age % 15 == 0) {
-                            spawnParticles(viewers, bubble.location, Particle.ITEM_CRACK, 1, 0.05, 0.05, 0.05, 0.01,
+                            spawnParticles(viewers, bubble.location, Particle.ITEM, 1, 0.05, 0.05, 0.05, 0.01,
                                     new ItemStack(Material.SLIME_BALL));
                         }
                     }
@@ -1793,16 +1793,16 @@ public class KillEffectManager {
                                 Math.sin(angle) * distance
                         );
                         
-                        spawnParticles(viewers, toxicGround, Particle.SLIME, 2, 0.2, 0.05, 0.2, 0.01);
+                        spawnParticles(viewers, toxicGround, Particle.ITEM_SLIME, 2, 0.2, 0.05, 0.2, 0.01);
                         if (random.nextInt(3) == 0) {
-                            spawnParticles(viewers, toxicGround, Particle.SMOKE_NORMAL, 1, 0.1, 0.1, 0.1, 0.005);
+                            spawnParticles(viewers, toxicGround, Particle.SMOKE, 1, 0.1, 0.1, 0.1, 0.005);
                         }
                     }
                 }
                 if (ticks % 4 == 0) {
                     Location fountain = center.clone().add(0, 0.5, 0);
-                    spawnParticles(viewers, fountain, Particle.SLIME, 8, 0.3, 0.5, 0.3, 0.05);
-                    spawnParticles(viewers, fountain, Particle.DRIP_LAVA, 3, 0.2, 0.3, 0.2, 0.02);
+                    spawnParticles(viewers, fountain, Particle.ITEM_SLIME, 8, 0.3, 0.5, 0.3, 0.05);
+                    spawnParticles(viewers, fountain, Particle.DRIPPING_LAVA, 3, 0.2, 0.3, 0.2, 0.02);
                 }
                 
                 ticks++;
@@ -1850,13 +1850,13 @@ public class KillEffectManager {
                 } else if (!exploded) {
                     exploded = true;
                     spawnParticles(viewers, center, Particle.FLASH, 15, 2, 1, 2, 0.3);
-                    spawnParticles(viewers, center, Particle.FIREWORKS_SPARK, 60, 3, 2, 3, 0.4);
+                    spawnParticles(viewers, center, Particle.FIREWORK, 60, 3, 2, 3, 0.4);
                     spawnParticles(viewers, center, Particle.END_ROD, 30, 2, 1, 2, 0.2);
                     for (int wave = 1; wave <= 4; wave++) {
                         for (int point = 0; point < 16; point++) {
                             double angle = (2 * Math.PI * point) / 16;
                             Location waveLoc = center.clone().add(Math.cos(angle) * wave * 2, 0.5, Math.sin(angle) * wave * 2);
-                            spawnParticles(viewers, waveLoc, Particle.EXPLOSION_LARGE, 1, 0.1, 0.1, 0.1, 0.0);
+                            spawnParticles(viewers, waveLoc, Particle.EXPLOSION, 1, 0.1, 0.1, 0.1, 0.0);
                         }
                     }
                 }
